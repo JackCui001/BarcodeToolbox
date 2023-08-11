@@ -1,73 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:autoLink="web|map"
-        android:text="textview"
-        android:textAlignment="textStart"
-        android:textColor="#000000"
-        android:textIsSelectable="true"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/disableParse"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/clearTextButton"
-        android:layout_width="112dp"
-        android:layout_height="72dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="16dp"
-        android:text="清理文本"
-        android:textSize="17sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/scanButton" />
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:autoLink="web|map"
+            android:textAlignment="textStart"
+            android:textColor="#000000"
+            android:textIsSelectable="true"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@tools:sample/date/mmddyy" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <Button
-        android:id="@+id/scanButton"
-        android:layout_width="112dp"
-        android:layout_height="72dp"
-        android:layout_marginBottom="16dp"
-        android:text="相机扫描"
-        android:textSize="17sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent" />
+    <com.nambimobile.widgets.efab.ExpandableFabLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/selectPicButton"
-        android:layout_width="112dp"
-        android:layout_height="72dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginBottom="16dp"
-        android:text="选择图片"
-        android:textSize="17sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/scanButton" />
+        <!-- The next 3 Views will only display in portrait orientation -->
 
-    <CheckBox
-        android:id="@+id/disableParse"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:text="禁用码值解析"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/selectPicButton"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <com.nambimobile.widgets.efab.ExpandableFab
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="24dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.nambimobile.widgets.efab.FabOption
+            android:id="@+id/fabClear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_icon="@android:drawable/ic_menu_delete"
+            app:label_hiddenToVisibleAnimationDurationMs="125"
+            app:fab_orientation="portrait"
+            app:label_text="清空文本" />
+
+        <com.nambimobile.widgets.efab.FabOption
+            android:id="@+id/fabCamScan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:label_hiddenToVisibleAnimationDurationMs="25"
+            app:fab_icon="@android:drawable/ic_menu_camera"
+            app:label_text="实时扫描" />
+
+        <com.nambimobile.widgets.efab.FabOption
+            android:id="@+id/fabPicScan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_icon="@android:drawable/ic_menu_gallery"
+            app:label_hiddenToVisibleAnimationDurationMs="25"
+            app:label_text="图片扫描" />
+
+        <com.nambimobile.widgets.efab.FabOption
+            android:id="@+id/fabSetting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_icon="@android:drawable/ic_menu_manage"
+            app:label_hiddenToVisibleAnimationDurationMs="25"
+            app:label_text="设置" />
+
+    </com.nambimobile.widgets.efab.ExpandableFabLayout>
+
+</FrameLayout>

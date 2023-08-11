@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">条形码扫描仪</string>
+    <string name="app_name">扫码仪</string>
+    <string name="title_activity_settings">设置</string>
 </resources>
