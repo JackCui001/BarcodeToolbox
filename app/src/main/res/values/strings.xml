@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">扫码仪</string>
     <string name="title_activity_settings">设置</string>
+    <string name="code_type_prompt">请选择要生成的码类型</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

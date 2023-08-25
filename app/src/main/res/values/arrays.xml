@@ -1,12 +1,54 @@
 <resources>
-    <!-- Reply Preference -->
-    <string-array name="reply_entries">
-        <item>Reply</item>
-        <item>Reply to all</item>
+    <string-array name="code">
+        <item>QR</item>
+        <item>Aztec</item>
+        <item>PDF417</item>
+        <item>DataMatrix</item>
+        <item>UPC-A</item>
+        <item>UPC-E</item>
+        <item>ITF14</item>
+        <item>EAN-8</item>
+        <item>EAN-13</item>
+        <item>Code 39</item>
+        <item>Code 93</item>
+        <item>Code 128</item>
+        <item>Codabar</item>
     </string-array>
-
-    <string-array name="reply_values">
-        <item>reply</item>
-        <item>reply_all</item>
+    <string-array name="cipher">
+        <item>WPA</item>
+        <item>WPA2</item>
+        <item>WPA3</item>
+        <item>WEP</item>
+        <item>无</item>
     </string-array>
+    <string-array name="hints">
+        <item>"最长支持2953个UTF-8编码字节。\n\n支持中文，1个中文字占用3个字节，如果内容过长会导致码复杂，影响识别。"</item>
+        <item>"最长支持2953个UTF-8编码字节。\n\n支持中文，1个中文字占用3个字节，如果内容过长会导致码复杂，影响识别。"</item>
+        <item>"最长支持1777个UTF-8编码字节。\n\n支持中文，1个中文字占用3个字节，如果内容过长会导致码复杂，影响识别。"</item>
+        <item>"最长支持2335个UTF-8编码字节。\n\n只支持英文，如果内容过长会导致码复杂，影响识别。"</item>
+        <item>"支持11位数字输入。\n\n只支持数字，生成包含12位数字的码图，包含最后一位校验数字。"</item>
+        <item>"支持7位数字输入。\n\n只支持数字，首位需要是0或1，生成包含8位数字的码图，包含最后一位校验数字。"</item>
+        <item>"支持80位以内数字输入，并且需要是偶数位。\n\n只支持数字，生成包含偶数位数字的码图，如果内容过长会导致码复杂，影响识别。"</item>
+        <item>"支持7位数字输入。\n\n只支持数字，生成包含8位数字的码图，包含最后一位校验数字。"</item>
+        <item>"支持12位数字输入。\n\n只支持数字，首位不可以是0，生成包含13位数字的码图，包含最后一位校验数字。首位如果不是0则生成UPC-A码。"</item>
+        <item>"最长支持80字节长度。\n\n字符集可以是数字、大写字母和- . \$ / + % SPACE英文格式符号。"</item>
+        <item>"最长支持80字节长度。\n\n字符集可以是数字、大写字母和- . \$ / + % * SPACE英文格式符号。"</item>
+        <item>"最长支持80字节长度。\n\n字符集是编码表中的字符集。"</item>
+        <item>"最长支持2953个UTF-8编码字节。\n\n开头如果是ABCDTN*E字符，结尾也要是相应字符，如果不是上述字符，则默认添加A到码值的开头和结尾。其他字符可以是数字和- . \$ / : +英文格式符号。"</item>
+    </string-array>
+    <integer-array name="maxBytes">
+        <item>2953</item>
+        <item>2953</item>
+        <item>1777</item>
+        <item>2335</item>
+        <item>11</item>
+        <item>7</item>
+        <item>80</item>
+        <item>7</item>
+        <item>12</item>
+        <item>80</item>
+        <item>80</item>
+        <item>80</item>
+        <item>2953</item>
+    </integer-array>
 </resources>

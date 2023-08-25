@@ -29,3 +29,12 @@
 -keep class com.huawei.hianalytics.**{*;}
 -keep class com.huawei.updatesdk.**{*;}
 -keep class com.huawei.hms.**{*;}
+-printusage usage.txt
+#-printseeds seeds.txt
+-assumenosideeffects class android.util.Log {
+     public static *** *(...);
+}
+-assumenosideeffects class java.io.PrintStream {
+    public *** println(...);
+    public *** print(...);
+}

@@ -11,11 +11,13 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Html
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
+import com.google.android.material.snackbar.Snackbar
 import com.huawei.hms.hmsscankit.ScanUtil
 import com.huawei.hms.ml.scan.HmsScan
 import com.huawei.hms.ml.scan.HmsScan.AddressInfo
@@ -24,12 +26,16 @@ import com.huawei.hms.ml.scan.HmsScan.WiFiConnectionInfo
 import com.huawei.hms.ml.scan.HmsScanFrame
 import com.huawei.hms.ml.scan.HmsScanFrameOptions
 import com.jackcui.codesc.databinding.ActivityMainBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var prefix: String
     private lateinit var lastHtmlStr: String
+
+    //    private lateinit var prefix: String
     private var scanCnt = 0
     private var parse = true
 
@@ -39,13 +45,26 @@ class MainActivity : AppCompatActivity() {
          * Define requestCode.
          */
         const val MULTIPLE_FILE_CHOICE_REQ_CODE = 1
-        const val REQUEST_PERM_REQ_CODE = 2
+        const val REQUEST_SCAN_PERM_REQ_CODE = 2
         const val CAM_SCAN_REQ_CODE = 3
         const val TAG = "BarcodeScanner"
         const val WAIT_FOR_SCAN = "等待识别"
-        const val CLEARED_WAIT_FOR_SCAN = "已清空 - 等待识别"
         const val INVOKED_BY_INTENT_VIEW = "【由外部应用打开文件调用】"
         const val INVOKED_BY_INTENT_SEND = "【由外部应用分享文件调用】"
+
+        fun showToast(context: Context, msg: String, duration: Int) {
+            GlobalScope.launch(Dispatchers.Main)
+            {
+                Toast.makeText(context, msg, duration).show()
+            }
+        }
+
+        fun showSnackbar(view: View, msg: String, duration: Int) {
+            GlobalScope.launch(Dispatchers.Main)
+            {
+                Snackbar.make(view, msg, duration).show()
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +73,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.textView.text = WAIT_FOR_SCAN
+        binding.tvOutput.text = WAIT_FOR_SCAN
         lastHtmlStr = WAIT_FOR_SCAN
 
         // 读取设置
@@ -68,42 +87,49 @@ class MainActivity : AppCompatActivity() {
 
         if (type != null) {
             if (!type.startsWith("image/")) {
-                Toast.makeText(this, "选择了错误的文件类型！", Toast.LENGTH_LONG).show()
+                showSnackbar(binding.fabSetting, "导入了错误的文件类型！", Snackbar.LENGTH_LONG)
             } else if (action == Intent.ACTION_SEND) {
-                binding.textView.text = INVOKED_BY_INTENT_SEND
+                binding.tvOutput.text = INVOKED_BY_INTENT_SEND
                 handleSendImage(intent) // Handle single image being sent
             } else if (action == Intent.ACTION_SEND_MULTIPLE) {
-                binding.textView.text = INVOKED_BY_INTENT_SEND
+                binding.tvOutput.text = INVOKED_BY_INTENT_SEND
                 handleSendMultipleImages(intent) // Handle multiple images being sent
             } else if (action == Intent.ACTION_VIEW) {
-                binding.textView.text = INVOKED_BY_INTENT_VIEW
+                binding.tvOutput.text = INVOKED_BY_INTENT_VIEW
                 handleViewImage(intent) // Handle single image being viewed
             }
         }
 
         // 处理选项1点击事件
         binding.fabClear.setOnClickListener {
-            Log.d(TAG, "Textview cleared")
-            binding.textView.text = CLEARED_WAIT_FOR_SCAN
-            lastHtmlStr = CLEARED_WAIT_FOR_SCAN
+            Log.d(TAG, "tvOutput Cleared")
+            showSnackbar(binding.fabSetting, "输出信息已清空", Snackbar.LENGTH_SHORT)
+            binding.tvOutput.text = WAIT_FOR_SCAN
+            lastHtmlStr = WAIT_FOR_SCAN
             scanCnt = 0
         }
 
 
         // 处理选项2点击事件
-        binding.fabCamScan.setOnClickListener {
-            requestPermission()
+        binding.fabScanCam.setOnClickListener {
+            reqPermAndScan()
         }
 
         // 处理选项3点击事件
-        binding.fabPicScan.setOnClickListener {
+        binding.fabScanPic.setOnClickListener {
             val chooseFile = Intent(Intent.ACTION_GET_CONTENT)
             chooseFile.type = "image/*" //选择图片
             chooseFile.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true) //设置可以多选文件
             val chooser = Intent.createChooser(chooseFile, "选择图片")
             startActivityForResult(chooser, MULTIPLE_FILE_CHOICE_REQ_CODE)
         }
+
         // 处理选项4点击事件
+        binding.fabGenCode.setOnClickListener {
+            startActivity(Intent(this, GenerateCodeActivity::class.java))
+        }
+
+        // 处理选项5点击事件
         binding.fabSetting.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
@@ -118,8 +144,7 @@ class MainActivity : AppCompatActivity() {
         // 获取 SharedPreferences 对象
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         // 读取字符串值，如果找不到对应的键，则返回默认值
-        prefix = sharedPreferences.getString("prefix", "null").toString()
-        // 读取其他类型的值，例如整数
+//        prefix = sharedPreferences.getString("prefix", "null").toString()
         // 读取布尔值
         parse = sharedPreferences.getBoolean("parse", true)
     }
@@ -148,10 +173,10 @@ class MainActivity : AppCompatActivity() {
     private fun scanPic(uri: Uri, multiPicIdx: Int = -1, multiPicAmt: Int = -1) {
         val img: Bitmap
         try {
-            img = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
+            img = MediaStore.Images.Media.getBitmap(contentResolver, uri)
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(this, "图片读取失败！", Toast.LENGTH_LONG).show()
+            showSnackbar(binding.fabSetting, "图片读取失败！", Snackbar.LENGTH_LONG)
             return
         }
         val frame = HmsScanFrame(img)
@@ -183,7 +208,7 @@ class MainActivity : AppCompatActivity() {
     ) {
         val codeAmt = results.size
         val newText = StringBuilder()
-        if (lastHtmlStr != WAIT_FOR_SCAN && lastHtmlStr != CLEARED_WAIT_FOR_SCAN) {
+        if (lastHtmlStr != WAIT_FOR_SCAN) {
             newText.append(lastHtmlStr)
         }
         if (multiPicAmt == -1 || multiPicIdx == 0) {
@@ -227,7 +252,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         lastHtmlStr = newText.toString().replace("\n", "<br>")
-        binding.textView.text = Html.fromHtml(lastHtmlStr)
+        binding.tvOutput.text = Html.fromHtml(lastHtmlStr)
     }
 
     private fun getHtmlStr(str: String, colorHex: String, fontSize: String = ""): String {
@@ -241,19 +266,14 @@ class MainActivity : AppCompatActivity() {
     /**
      * Apply for permissions.
      */
-    private fun requestPermission() {
+    private fun reqPermAndScan() {
+        val perms = mutableListOf(Manifest.permission.CAMERA)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ActivityCompat.requestPermissions(
-                this, arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_MEDIA_IMAGES),
-                REQUEST_PERM_REQ_CODE
-            )
+            perms.add(Manifest.permission.READ_MEDIA_IMAGES)
         } else {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE),
-                REQUEST_PERM_REQ_CODE
-            )
+            perms.add(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
+        ActivityCompat.requestPermissions(this, perms.toTypedArray(), REQUEST_SCAN_PERM_REQ_CODE)
     }
 
     /**
@@ -269,16 +289,18 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (grantResults.size < 2 || grantResults[0] != PackageManager.PERMISSION_GRANTED || grantResults[1] != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "Permission granted: false")
-            AlertDialog.Builder(this).setTitle("提示")  // 设置对话框的标题文本
-                .setMessage("权限授予失败，请允许授予权限以正常使用此应用。\n本应用仅申请必要权限，请放心授权。")  // 设置对话框的内容文本
-                .setNegativeButton("关闭") { _, _ ->
-                }.show()
-            return
+        for (i in grantResults.indices) {
+            if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "${permissions[i]} granted: false")
+                AlertDialog.Builder(this).setTitle("提示")
+                    .setMessage("权限授予失败，请允许授予权限以正常使用此应用。\n本应用仅申请必要权限，请放心授权。")
+                    .setNegativeButton("关闭") { _, _ ->
+                    }.show()
+                return
+            }
         }
         // Default View Mode
-        if (requestCode == REQUEST_PERM_REQ_CODE) {
+        if (requestCode == REQUEST_SCAN_PERM_REQ_CODE) {
             ScanUtil.startScan(this, CAM_SCAN_REQ_CODE, null)
         }
     }
@@ -297,7 +319,9 @@ class MainActivity : AppCompatActivity() {
         }
         if (requestCode == CAM_SCAN_REQ_CODE) {
             val res = data.getParcelableExtra<HmsScan>(ScanUtil.RESULT)
-            res?.let { printResults(arrayOf(it)) }
+            res?.let {
+                printResults(arrayOf(it))
+            }
         }
         if (requestCode == MULTIPLE_FILE_CHOICE_REQ_CODE) {
             val cd = data.clipData
@@ -308,7 +332,9 @@ class MainActivity : AppCompatActivity() {
                     scanPic(item.uri, i, cd.itemCount)
                 }
             } else {
-                data.data?.let { scanPic(it) }
+                data.data?.let {
+                    scanPic(it)
+                }
             }
         }
     }
@@ -412,32 +438,32 @@ class MainActivity : AppCompatActivity() {
                 val addrInfoList = tmp.getAddressesInfos()
                 val note = tmp.getNote()
                 if (peopleName != null) {
-                    newText.append("姓名：")
+                    newText.append("姓名： ")
                     newText.append(peopleName.getFullName())
                     newText.append("\n")
                 }
                 if (!tels.isNullOrEmpty()) {
-                    newText.append("电话：")
+                    newText.append("电话：\n")
                     for (tel in tels) {
                         when (tel.getUseType()) {
                             TelPhoneNumber.CELLPHONE_NUMBER_USE_TYPE -> {
-                                newText.append("手机 - ")
+                                newText.append("手机： ")
                             }
 
                             TelPhoneNumber.RESIDENTIAL_USE_TYPE -> {
-                                newText.append("住家 - ")
+                                newText.append("住家： ")
                             }
 
                             TelPhoneNumber.OFFICE_USE_TYPE -> {
-                                newText.append("工作 - ")
+                                newText.append("办公： ")
                             }
 
                             TelPhoneNumber.FAX_USE_TYPE -> {
-                                newText.append("传真 - ")
+                                newText.append("传真： ")
                             }
 
                             TelPhoneNumber.OTHER_USE_TYPE -> {
-                                newText.append("其他 - ")
+                                newText.append("其他： ")
                             }
                         }
                         newText.append(tel.getTelPhoneNumber())
@@ -445,7 +471,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 if (!emailContentList.isNullOrEmpty()) {
-                    newText.append("邮箱：")
+                    newText.append("邮箱： ")
                     val emails = ArrayList<String>()
                     for (email in emailContentList) {
                         emails.add(email.getAddressInfo())
@@ -454,34 +480,34 @@ class MainActivity : AppCompatActivity() {
                     newText.append("\n")
                 }
                 if (!contactLinks.isNullOrEmpty()) {
-                    newText.append("URL:  ")
+                    newText.append("URL： ")
                     newText.append(contactLinks.toList().joinToString())
                     newText.append("\n")
                 }
                 if (!company.isNullOrEmpty()) {
-                    newText.append("公司：")
+                    newText.append("公司： ")
                     newText.append(company)
                     newText.append("\n")
                 }
                 if (!title.isNullOrEmpty()) {
-                    newText.append("职位：")
+                    newText.append("职位： ")
                     newText.append(title)
                     newText.append("\n")
                 }
                 if (!addrInfoList.isNullOrEmpty()) {
-                    newText.append("地址：")
+                    newText.append("地址：\n")
                     for (addrInfo in addrInfoList) {
                         when (addrInfo.getAddressType()) {
                             AddressInfo.RESIDENTIAL_USE_TYPE -> {
-                                newText.append("住家 - ")
+                                newText.append("住家： ")
                             }
 
                             AddressInfo.OFFICE_TYPE -> {
-                                newText.append("工作 - ")
+                                newText.append("办公： ")
                             }
 
                             AddressInfo.OTHER_USE_TYPE -> {
-                                newText.append("其他 - ")
+                                newText.append("其他： ")
                             }
                         }
                         newText.append(addrInfo.getAddressDetails().toList().joinToString())
@@ -489,7 +515,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 if (!note.isNullOrEmpty()) {
-                    newText.append("备注：")
+                    newText.append("备注： ")
                     newText.append(note)
                     newText.append("\n")
                 }
@@ -516,72 +542,72 @@ class MainActivity : AppCompatActivity() {
                 val avenue = tmp.getAvenue()
                 val zipCode = tmp.getZipCode()
                 if (!familyName.isNullOrEmpty()) {
-                    newText.append("姓：")
+                    newText.append("姓： ")
                     newText.append(familyName)
                     newText.append("\n")
                 }
                 if (!middleName.isNullOrEmpty()) {
-                    newText.append("中间名：")
+                    newText.append("中间名： ")
                     newText.append(middleName)
                     newText.append("\n")
                 }
                 if (!givenName.isNullOrEmpty()) {
-                    newText.append("名：")
+                    newText.append("名： ")
                     newText.append(givenName)
                     newText.append("\n")
                 }
                 if (!sex.isNullOrEmpty()) {
-                    newText.append("性别：")
+                    newText.append("性别： ")
                     newText.append(sex)
                     newText.append("\n")
                 }
                 if (!dateOfBirth.isNullOrEmpty()) {
-                    newText.append("出生日期：")
+                    newText.append("出生日期： ")
                     newText.append(dateOfBirth)
                     newText.append("\n")
                 }
                 if (!countryOfIssue.isNullOrEmpty()) {
-                    newText.append("驾照发放国：")
+                    newText.append("驾照发放国： ")
                     newText.append(countryOfIssue)
                     newText.append("\n")
                 }
                 if (!certType.isNullOrEmpty()) {
-                    newText.append("驾照类型：")
+                    newText.append("驾照类型： ")
                     newText.append(certType)
                     newText.append("\n")
                 }
                 if (!certNum.isNullOrEmpty()) {
-                    newText.append("驾照号码：")
+                    newText.append("驾照号码： ")
                     newText.append(certNum)
                     newText.append("\n")
                 }
                 if (!dateOfIssue.isNullOrEmpty()) {
-                    newText.append("发证日期：")
+                    newText.append("发证日期： ")
                     newText.append(dateOfIssue)
                     newText.append("\n")
                 }
                 if (!dateOfExpire.isNullOrEmpty()) {
-                    newText.append("过期日期：")
+                    newText.append("过期日期： ")
                     newText.append(dateOfExpire)
                     newText.append("\n")
                 }
                 if (!province.isNullOrEmpty()) {
-                    newText.append("省/州：")
+                    newText.append("省/州： ")
                     newText.append(province)
                     newText.append("\n")
                 }
                 if (!city.isNullOrEmpty()) {
-                    newText.append("城市：")
+                    newText.append("城市： ")
                     newText.append(city)
                     newText.append("\n")
                 }
                 if (!avenue.isNullOrEmpty()) {
-                    newText.append("街道：")
+                    newText.append("街道： ")
                     newText.append(avenue)
                     newText.append("\n")
                 }
                 if (!zipCode.isNullOrEmpty()) {
-                    newText.append("邮政编码：")
+                    newText.append("邮政编码： ")
                     newText.append(zipCode)
                     newText.append("\n")
                 }
@@ -590,25 +616,25 @@ class MainActivity : AppCompatActivity() {
                 newText.append("\n")
             }
         } else if (scanTypeForm == HmsScan.EMAIL_CONTENT_FORM) {
-            newText.append("邮件信息：\n")
+            newText.append("E-mail：\n")
             if (parse) {
                 val email = res.getEmailContent()
                 val addrInfo = email.getAddressInfo()
                 val subjectInfo = email.getSubjectInfo()
                 val bodyInfo = email.getBodyInfo()
                 if (!addrInfo.isNullOrEmpty()) {
-                    newText.append("收件邮箱：")
+                    newText.append("收件邮箱： ")
                     newText.append(addrInfo)
                     newText.append("\n")
                 }
                 if (!subjectInfo.isNullOrEmpty()) {
-                    newText.append("标题：")
+                    newText.append("主题： ")
                     newText.append(subjectInfo)
                     newText.append("\n")
                 }
                 if (!bodyInfo.isNullOrEmpty()) {
-                    newText.append("内容：")
-                    newText.append(bodyInfo)
+                    newText.append("内容： ")
+                    newText.append(bodyInfo.substringBeforeLast(";;"))
                     newText.append("\n")
                 }
             } else {
@@ -627,37 +653,37 @@ class MainActivity : AppCompatActivity() {
                 val placeInfo = tmp.getPlaceInfo()
                 val condition = tmp.getCondition()
                 if (!abstractInfo.isNullOrEmpty()) {
-                    newText.append("描述：")
+                    newText.append("描述： ")
                     newText.append(abstractInfo)
                     newText.append("\n")
                 }
                 if (!theme.isNullOrEmpty()) {
-                    newText.append("摘要：")
+                    newText.append("摘要： ")
                     newText.append(theme)
                     newText.append("\n")
                 }
                 if (beginTimeInfo != null) {
-                    newText.append("开始时间：")
+                    newText.append("开始时间： ")
                     newText.append(beginTimeInfo.originalValue)
                     newText.append("\n")
                 }
                 if (closeTimeInfo != null) {
-                    newText.append("开始时间：")
+                    newText.append("开始时间： ")
                     newText.append(closeTimeInfo.originalValue)
                     newText.append("\n")
                 }
                 if (!sponsor.isNullOrEmpty()) {
-                    newText.append("组织者：")
+                    newText.append("组织者： ")
                     newText.append(sponsor)
                     newText.append("\n")
                 }
                 if (!placeInfo.isNullOrEmpty()) {
-                    newText.append("地点：")
+                    newText.append("地点： ")
                     newText.append(placeInfo)
                     newText.append("\n")
                 }
                 if (!condition.isNullOrEmpty()) {
-                    newText.append("状态：")
+                    newText.append("状态： ")
                     newText.append(condition)
                     newText.append("\n")
                 }
@@ -670,15 +696,15 @@ class MainActivity : AppCompatActivity() {
             newText.append(res.getOriginalValue())
             newText.append("\n")
         } else if (scanTypeForm == HmsScan.LOCATION_COORDINATE_FORM) {
-            newText.append("位置信息：\n")
+            newText.append("坐标：\n")
             if (parse) {
                 val tmp = res.getLocationCoordinate()
                 val latitude = tmp.getLatitude()
                 val longitude = tmp.getLongitude()
-                newText.append("经度：")
+                newText.append("经度： ")
                 newText.append(longitude)
                 newText.append("\n")
-                newText.append("纬度：")
+                newText.append("纬度： ")
                 newText.append(latitude)
                 newText.append("\n")
             } else {
@@ -696,12 +722,12 @@ class MainActivity : AppCompatActivity() {
                 val destPhoneNumber = tmp.getDestPhoneNumber()
                 val msgContent = tmp.getMsgContent()
                 if (!destPhoneNumber.isNullOrEmpty()) {
-                    newText.append("收件号码：")
+                    newText.append("收信人： ")
                     newText.append(destPhoneNumber)
                     newText.append("\n")
                 }
                 if (!msgContent.isNullOrEmpty()) {
-                    newText.append("内容：")
+                    newText.append("内容： ")
                     newText.append(msgContent)
                     newText.append("\n")
                 }
@@ -716,23 +742,23 @@ class MainActivity : AppCompatActivity() {
                 if (tmp != null) {
                     when (tmp.getUseType()) {
                         TelPhoneNumber.CELLPHONE_NUMBER_USE_TYPE -> {
-                            newText.append("手机：")
+                            newText.append("手机： ")
                         }
 
                         TelPhoneNumber.RESIDENTIAL_USE_TYPE -> {
-                            newText.append("住家：")
+                            newText.append("住家： ")
                         }
 
                         TelPhoneNumber.OFFICE_USE_TYPE -> {
-                            newText.append("工作：")
+                            newText.append("办公： ")
                         }
 
                         TelPhoneNumber.FAX_USE_TYPE -> {
-                            newText.append("传真：")
+                            newText.append("传真： ")
                         }
 
                         TelPhoneNumber.OTHER_USE_TYPE -> {
-                            newText.append("其他：")
+                            newText.append("其他： ")
                         }
                     }
                     newText.append(tmp.getTelPhoneNumber())
@@ -749,12 +775,12 @@ class MainActivity : AppCompatActivity() {
                 val theme = tmp.getTheme()
                 val linkValue = tmp.linkValue
                 if (!theme.isNullOrEmpty()) {
-                    newText.append("标题：")
+                    newText.append("标题： ")
                     newText.append(theme)
                     newText.append("\n")
                 }
                 if (!linkValue.isNullOrEmpty()) {
-                    newText.append("链接：")
+                    newText.append("链接： ")
                     newText.append(linkValue)
                     newText.append("\n")
                 }
@@ -770,19 +796,19 @@ class MainActivity : AppCompatActivity() {
                 val pwd = tmp.getPassword()
                 val cipherMode = tmp.getCipherMode()
                 if (!ssid.isNullOrEmpty()) {
-                    newText.append("SSID (网络名称)：")
+                    newText.append("热点名称 (SSID)： ")
                     newText.append(ssid)
                     newText.append("\n")
                 }
                 if (!pwd.isNullOrEmpty()) {
-                    newText.append("密码：")
+                    newText.append("密码： ")
                     newText.append(pwd)
                     newText.append("\n")
                 }
-                newText.append("加密方式：")
+                newText.append("加密方式： ")
                 when (cipherMode) {
                     WiFiConnectionInfo.WPA_MODE_TYPE -> {
-                        newText.append("WPA*")
+                        newText.append("WPA/WPA2")
                     }
 
                     WiFiConnectionInfo.WEP_MODE_TYPE -> {
@@ -794,12 +820,12 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     WiFiConnectionInfo.SAE_MODE_TYPE -> {
-                        newText.append("WPA3-SAE")
+                        newText.append("WPA3")
                     }
                 }
                 newText.append("\n")
-                newText.append("隐藏网络：")
-                if (res.getOriginalValue().indexOf("H:true", ignoreCase = true) != -1) {
+                newText.append("隐藏网络： ")
+                if (res.getOriginalValue().indexOf("H: true", ignoreCase = true) != -1) {
                     newText.append("是")
                 } else {
                     newText.append("否")

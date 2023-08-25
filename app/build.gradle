@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace 'com.jackcui.codesc'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.jackcui.codesc"
         minSdk 19
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.1"
         multiDexEnabled true
@@ -20,6 +20,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -42,5 +43,5 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.nambimobile.widgets:expandable-fab:1.2.1'
-    implementation 'androidx.preference:preference:1.2.0'
+    implementation 'androidx.preference:preference-ktx:1.2.0'
 }

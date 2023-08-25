@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,14 +11,14 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/tv_output"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
-            android:autoLink="web|map"
+            android:autoLink="web|email|map"
             android:textAlignment="textStart"
             android:textColor="#000000"
             android:textIsSelectable="true"
@@ -44,38 +44,51 @@
             android:layout_marginBottom="24dp" />
 
         <com.nambimobile.widgets.efab.FabOption
-            android:id="@+id/fabClear"
+            android:id="@+id/fab_clear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:fab_icon="@android:drawable/ic_menu_delete"
-            app:label_hiddenToVisibleAnimationDurationMs="125"
+            app:fab_icon="@drawable/outline_delete_sweep_24"
             app:fab_orientation="portrait"
-            app:label_text="清空文本" />
+            app:label_hiddenToVisibleAnimationDurationMs="25"
+            app:label_text="清空输出"
+            app:maxImageSize="22dp" />
 
         <com.nambimobile.widgets.efab.FabOption
-            android:id="@+id/fabCamScan"
+            android:id="@+id/fab_scan_cam"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:fab_icon="@drawable/outline_qr_code_scanner_24"
             app:label_hiddenToVisibleAnimationDurationMs="25"
-            app:fab_icon="@android:drawable/ic_menu_camera"
-            app:label_text="实时扫描" />
+            app:label_text="实时扫描"
+            app:maxImageSize="22dp" />
 
         <com.nambimobile.widgets.efab.FabOption
-            android:id="@+id/fabPicScan"
+            android:id="@+id/fab_scan_pic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:fab_icon="@android:drawable/ic_menu_gallery"
+            app:fab_icon="@drawable/outline_document_scanner_24"
             app:label_hiddenToVisibleAnimationDurationMs="25"
-            app:label_text="图片扫描" />
+            app:label_text="图片扫描"
+            app:maxImageSize="22dp" />
 
         <com.nambimobile.widgets.efab.FabOption
-            android:id="@+id/fabSetting"
+            android:id="@+id/fab_gen_code"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:fab_icon="@android:drawable/ic_menu_manage"
+            app:fab_icon="@drawable/outline_add_to_photos_24"
             app:label_hiddenToVisibleAnimationDurationMs="25"
-            app:label_text="设置" />
+            app:label_text="构建码"
+            app:maxImageSize="22dp" />
+
+        <com.nambimobile.widgets.efab.FabOption
+            android:id="@+id/fab_setting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_icon="@drawable/outline_settings_24"
+            app:label_hiddenToVisibleAnimationDurationMs="25"
+            app:label_text="设置"
+            app:maxImageSize="22dp" />
 
     </com.nambimobile.widgets.efab.ExpandableFabLayout>
 
-</FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

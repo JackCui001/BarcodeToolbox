@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.jackcui.barcodesc",
+  "applicationId": "com.jackcui.codesc",
   "variantName": "release",
   "elements": [
     {
