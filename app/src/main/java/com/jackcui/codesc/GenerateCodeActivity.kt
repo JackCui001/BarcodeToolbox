@@ -2,6 +2,7 @@ package com.jackcui.codesc
 
 import android.Manifest
 import android.content.ContentValues
+import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
@@ -12,9 +13,7 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
-import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -26,7 +25,9 @@ import com.jackcui.codesc.MainActivity.Companion.TAG
 import com.jackcui.codesc.MainActivity.Companion.showSnackbar
 import com.jackcui.codesc.databinding.ActivityGenerateCodeBinding
 import com.jackcui.codesc.databinding.DialogContactBinding
+import com.jackcui.codesc.databinding.DialogCoordBinding
 import com.jackcui.codesc.databinding.DialogEmailBinding
+import com.jackcui.codesc.databinding.DialogPhoneBinding
 import com.jackcui.codesc.databinding.DialogSmsBinding
 import com.jackcui.codesc.databinding.DialogWifiBinding
 import kotlinx.coroutines.Dispatchers
@@ -37,12 +38,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+
 class GenerateCodeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityGenerateCodeBinding
     private lateinit var codeTypeStrArr: Array<String>
     private var showCodeTypeInfo = true
     private var codePreviewIdx = 0
     private var codeBitmap: Bitmap? = null
+    private var res = StringBuilder()
 
     private val reqPermLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -55,6 +58,13 @@ class GenerateCodeActivity : AppCompatActivity() {
                     }.show()
             }
         }
+    private val convertInfoDismissCallback = DialogInterface.OnDismissListener {
+        if (res.isNotBlank()) {
+            binding.etGenContent.setText(res)
+            showSnackbar(binding.root, "特殊信息转换完成", Snackbar.LENGTH_SHORT)
+            res.clear()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,7 +100,14 @@ class GenerateCodeActivity : AppCompatActivity() {
 
         binding.tvLenInd.text = "剩余可用字节：${maxBytes[0]}"
         binding.etGenContent.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+            override fun beforeTextChanged(
+                s: CharSequence,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {
+            }
+
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable) {
                 binding.tvLenInd.text =
@@ -131,55 +148,19 @@ class GenerateCodeActivity : AppCompatActivity() {
 //        }
 
         binding.btnSpInfoConvert.setOnClickListener {
-            val items = arrayOf("Wi-Fi", "E-mail", "电话", "短信", "联系人", "坐标")
-            var res = ""
+            val items = arrayOf("Wi-Fi", "E-mail", "电话号码", "短信", "联系人", "坐标")
 
-            AlertDialog.Builder(this).setTitle("请选择一种信息类型").setItems(items) { _, which ->
-                when (which) {
-                    0 -> res = showWifiDialog()
-                    1 -> res = showEmailDialog()
-                    2 -> {
-                        val etPhone = EditText(this)
-                        etPhone.inputType = EditorInfo.TYPE_CLASS_NUMBER
-                        AlertDialog.Builder(this).setView(etPhone).setTitle("请输入电话号码：")
-                            .setPositiveButton("确认") { _, _ ->
-                                if (etPhone.text.isBlank()) {
-                                    showSnackbar(
-                                        binding.root,
-                                        "输入内容为空！",
-                                        Snackbar.LENGTH_SHORT
-                                    )
-                                    return@setPositiveButton
-                                }
-                                res = "TEL:${etPhone.text}"
-                            }.show()
+            AlertDialog.Builder(this).setTitle("请选择一种信息类型")
+                .setItems(items) { _, which ->
+                    when (which) {
+                        0 -> showWifiDialog(res)
+                        1 -> showEmailDialog(res)
+                        2 -> showPhoneDialog(res)
+                        3 -> showSmsDialog(res)
+                        4 -> showContactDialog(res)
+                        5 -> showCoordDialog(res)
                     }
-                    3 -> res = showSmsDialog()
-                    4 -> res = showContactDialog()
-                    5 -> {
-                        TODO()
-                        val etCoord = EditText(this)
-                        etCoord.inputType = EditorInfo.TYPE_NUMBER_FLAG_DECIMAL
-                        AlertDialog.Builder(this).setView(etCoord).setTitle("请输入电话号码：")
-                            .setPositiveButton("确认") { _, _ ->
-                                if (etCoord.text.isBlank()) {
-                                    showSnackbar(
-                                        binding.root,
-                                        "输入内容为空！",
-                                        Snackbar.LENGTH_SHORT
-                                    )
-                                    return@setPositiveButton
-                                }
-                                res = "GEO:${etCoord.text}"
-                            }.show()
-                    }
-                }
-            }.show()
-
-            if (res.isNotEmpty()) {
-                binding.etGenContent.setText(res)
-                showSnackbar(binding.root, "特殊信息转换完成", Snackbar.LENGTH_SHORT)
-            }
+                }.show()
         }
 
         binding.btnGenCode.setOnClickListener {
@@ -251,29 +232,29 @@ class GenerateCodeActivity : AppCompatActivity() {
         // Create a new image file
         val fileName = "${sdf.format(Date())}_${codeTypeStrArr[codePreviewIdx]}.png"
         val filePath: String
-        var fileFullName: String
+        var filePathAndName: String
         val imageDetails = ContentValues().apply {
             put(MediaStore.Images.Media.MIME_TYPE, "image/png")
             put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val relativeFilePath =
                     "${Environment.DIRECTORY_PICTURES}${File.separator}CodeScanner"
-                fileFullName =
+                filePathAndName =
                     "${Environment.getExternalStorageDirectory().path}${File.separator}${Environment.DIRECTORY_PICTURES}${File.separator}CodeScanner${File.separator}$fileName"
                 put(MediaStore.Images.Media.RELATIVE_PATH, relativeFilePath)
                 put(MediaStore.Images.Media.IS_PENDING, 1)
             } else {
                 filePath =
                     "${Environment.getExternalStorageDirectory().path}${File.separator}${Environment.DIRECTORY_PICTURES}${File.separator}CodeScanner"
-                fileFullName = filePath + "${File.separator}$fileName"
+                filePathAndName = filePath + "${File.separator}$fileName"
                 val folder = File(filePath)
                 if (!folder.exists()) {
                     folder.mkdirs()
                 }
-                put(MediaStore.MediaColumns.DATA, fileFullName)
+                put(MediaStore.MediaColumns.DATA, filePathAndName)
             }
         }
-        Log.d(TAG, "genCode: $fileFullName")
+        Log.d(TAG, "genCode: $filePathAndName")
 
         // Keep a handle to the new image's URI in case you need to modify it later
         val imageUri = resolver.insert(imageCollection, imageDetails)
@@ -291,12 +272,9 @@ class GenerateCodeActivity : AppCompatActivity() {
 
             // Method 2
             resolver.openOutputStream(it).use { os ->
-                if (os != null) {
-                    codeBitmap?.compress(Bitmap.CompressFormat.PNG, 100, os)
-                }
+                os?.let { codeBitmap?.compress(Bitmap.CompressFormat.PNG, 100, it) }
             }
         }
-
 
         // Clear pending flag (Android 10+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -306,8 +284,9 @@ class GenerateCodeActivity : AppCompatActivity() {
                 resolver.update(imageUri, imageDetails, null, null)
             }
         }
+
         if (imageUri != null) {
-            showSnackbar(binding.root, "图片已保存到：$fileFullName", Snackbar.LENGTH_LONG)
+            showSnackbar(binding.root, "图片已保存到：$filePathAndName", Snackbar.LENGTH_LONG)
         } else {
             showSnackbar(binding.root, "发生异常，图片保存失败！", Snackbar.LENGTH_LONG)
         }
@@ -323,7 +302,7 @@ class GenerateCodeActivity : AppCompatActivity() {
 //        }
     }
 
-    private fun showWifiDialog(): String {
+    private fun showWifiDialog(wifiStr: StringBuilder) {
         var cipherType = "WPA"
         val wifiBinding = DialogWifiBinding.inflate(layoutInflater)
         wifiBinding.spnCipherType.onItemSelectedListener =
@@ -349,19 +328,19 @@ class GenerateCodeActivity : AppCompatActivity() {
                 override fun onNothingSelected(p0: AdapterView<*>?) {}
             }
 
-        val wifiStr = StringBuilder("WIFI:")
+        wifiStr.append("WIFI:")
         val dialog = AlertDialog.Builder(this).setView(wifiBinding.root).setTitle("Wi-Fi")
             .setPositiveButton("确认", null).setOnCancelListener {
                 Log.d(TAG, "showWifiDialog: OnCancel")
                 wifiStr.clear()
-            }.show()
+            }.setOnDismissListener(convertInfoDismissCallback).show()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             if (wifiBinding.etWifiSsid.text.isBlank()) {
-                wifiBinding.etWifiSsid.error = "SSID不能为空！"
+                wifiBinding.etWifiSsid.error = "SSID不能为空"
                 return@setOnClickListener
             }
             if (wifiBinding.etWifiPwd.isEnabled && wifiBinding.etWifiPwd.text.isBlank()) {
-                wifiBinding.etWifiPwd.error = "密码不能为空！"
+                wifiBinding.etWifiPwd.error = "密码不能为空"
                 return@setOnClickListener
             }
             if (cipherType != "无") {
@@ -372,66 +351,84 @@ class GenerateCodeActivity : AppCompatActivity() {
                 wifiStr.append("P:${wifiBinding.etWifiPwd.text};")
             }
             wifiStr.append("H:${wifiBinding.etWifiHidden.isChecked};")
+            dialog.dismiss()
         }
-        return wifiStr.toString()
     }
 
-    private fun showEmailDialog(): String {
+    private fun showEmailDialog(emailStr: StringBuilder) {
         val emailBinding = DialogEmailBinding.inflate(layoutInflater)
-        val emailStr = StringBuilder("MATMSG:")
+        emailStr.append("MATMSG:")
         val dialog = AlertDialog.Builder(this).setView(emailBinding.root).setTitle("E-mail")
             .setPositiveButton("确认", null).setOnCancelListener {
                 Log.d(TAG, "showEmailDialog: OnCancel")
                 emailStr.clear()
-            }.show()
+            }.setOnDismissListener(convertInfoDismissCallback).show()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             if (emailBinding.etEmailAddr.text.isBlank()) {
-                emailBinding.etEmailAddr.error = "收件邮箱不能为空！"
+                emailBinding.etEmailAddr.error = "收件邮箱不能为空"
                 return@setOnClickListener
             }
             if (emailBinding.etEmailSubject.text.isBlank()) {
-                emailBinding.etEmailSubject.error = "主题不能为空！"
+                emailBinding.etEmailSubject.error = "主题不能为空"
                 return@setOnClickListener
             }
             if (emailBinding.etEmailContent.text.isBlank()) {
-                emailBinding.etEmailContent.error = "内容不能为空！"
+                emailBinding.etEmailContent.error = "内容不能为空"
                 return@setOnClickListener
             }
             emailStr.append("TO:${emailBinding.etEmailAddr.text};SUB:${emailBinding.etEmailSubject.text};BODY:${emailBinding.etEmailContent.text};;")
+            dialog.dismiss()
         }
-        return emailStr.toString()
     }
 
-    private fun showSmsDialog(): String {
+    private fun showPhoneDialog(phoneStr: StringBuilder) {
+        val phoneBinding = DialogPhoneBinding.inflate(layoutInflater)
+        phoneStr.append("TEL:")
+        val dialog = AlertDialog.Builder(this).setView(phoneBinding.root).setTitle("电话号码")
+            .setPositiveButton("确认", null).setOnCancelListener {
+                Log.d(TAG, "showPhoneDialog: OnCancel")
+                phoneStr.clear()
+            }.setOnDismissListener(convertInfoDismissCallback).show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            if (phoneBinding.etPhoneNumber.text.isBlank()) {
+                phoneBinding.etPhoneNumber.error = "电话号码不能为空"
+                return@setOnClickListener
+            }
+            phoneStr.append("${phoneBinding.etPhoneNumber.text}")
+            dialog.dismiss()
+        }
+    }
+
+    private fun showSmsDialog(smsStr: StringBuilder) {
         val smsBinding = DialogSmsBinding.inflate(layoutInflater)
-        val smsStr = StringBuilder("SMSTO:")
+        smsStr.append("SMSTO:")
         val dialog = AlertDialog.Builder(this).setView(smsBinding.root).setTitle("短信")
             .setPositiveButton("确认", null).setOnCancelListener {
                 Log.d(TAG, "showSmsDialog: OnCancel")
                 smsStr.clear()
-            }.show()
+            }.setOnDismissListener(convertInfoDismissCallback).show()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             if (smsBinding.etSmsPhone.text.isBlank()) {
-                smsBinding.etSmsPhone.error = "收件邮箱不能为空！"
+                smsBinding.etSmsPhone.error = "收件邮箱不能为空"
                 return@setOnClickListener
             }
             if (smsBinding.etSmsContent.text.isBlank()) {
-                smsBinding.etSmsContent.error = "内容不能为空！"
+                smsBinding.etSmsContent.error = "内容不能为空"
                 return@setOnClickListener
             }
             smsStr.append("${smsBinding.etSmsPhone.text}:${smsBinding.etSmsContent.text}")
+            dialog.dismiss()
         }
-        return smsStr.toString()
     }
 
-    private fun showContactDialog(): String {
+    private fun showContactDialog(contactStr: StringBuilder) {
         val contactBinding = DialogContactBinding.inflate(layoutInflater)
-        val contactStr = StringBuilder("BEGIN:VCARD\nVERSION:3.0\n")
+        contactStr.append("BEGIN:VCARD\nVERSION:3.0\n")
         val dialog = AlertDialog.Builder(this).setView(contactBinding.root).setTitle("联系人")
             .setPositiveButton("确认", null).setOnCancelListener {
                 Log.d(TAG, "showContactDialog: OnCancel")
                 contactStr.clear()
-            }.show()
+            }.setOnDismissListener(convertInfoDismissCallback).show()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val firstName = contactBinding.etContactFirstName.text
             val lastName = contactBinding.etContactLastName.text
@@ -468,7 +465,7 @@ class GenerateCodeActivity : AppCompatActivity() {
             if (firstName.isNotBlank() || lastName.isNotBlank()) {
                 contactStr.append("FN:")
                 if (firstName.isNotBlank() && lastName.isNotBlank()) {
-                    contactStr.append("$lastName $firstName\n")
+                    contactStr.append("$firstName $lastName\n")
                 } else if (lastName.isNotBlank()) {
                     contactStr.append(" $lastName\n")
                 } else {
@@ -488,6 +485,7 @@ class GenerateCodeActivity : AppCompatActivity() {
                 contactStr.append(if (region.isNotBlank()) ";$region" else ";")
                 contactStr.append(if (postcode.isNotBlank()) ";$postcode" else ";")
                 contactStr.append(if (country.isNotBlank()) ";$country" else ";")
+                contactStr.append("\n")
             }
             if (officePhone.isNotBlank()) {
                 contactStr.append("TEL;WORK;VOICE:$officePhone\n")
@@ -505,10 +503,31 @@ class GenerateCodeActivity : AppCompatActivity() {
                 contactStr.append("URL:$url\n")
             }
             contactStr.append("END:VCARD")
+            dialog.dismiss()
         }
-        return contactStr.toString()
     }
 
+    private fun showCoordDialog(coordStr: StringBuilder) {
+        val coordBinding = DialogCoordBinding.inflate(layoutInflater)
+        coordStr.append("GEO:")
+        val dialog = AlertDialog.Builder(this).setView(coordBinding.root).setTitle("坐标")
+            .setPositiveButton("确认", null).setOnCancelListener {
+                Log.d(TAG, "showCoordDialog: OnCancel")
+                coordStr.clear()
+            }.setOnDismissListener(convertInfoDismissCallback).show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            if (coordBinding.etCoordLongitude.text.isBlank()) {
+                coordBinding.etCoordLongitude.error = "经度不能为空"
+                return@setOnClickListener
+            }
+            if (coordBinding.etCoordLatitude.text.isBlank()) {
+                coordBinding.etCoordLatitude.error = "纬度不能为空"
+                return@setOnClickListener
+            }
+            coordStr.append("${coordBinding.etCoordLatitude.text},${coordBinding.etCoordLongitude.text}")
+            dialog.dismiss()
+        }
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         super.onOptionsItemSelected(item)

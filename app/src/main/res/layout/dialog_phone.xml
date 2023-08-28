@@ -4,24 +4,14 @@
     android:orientation="vertical">
 
     <EditText
-        android:id="@+id/et_sms_phone"
+        android:id="@+id/et_phone_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="4dp"
         android:layout_marginTop="16dp"
         android:layout_marginRight="4dp"
-        android:hint="收信人"
+        android:hint="请在此输入号码"
         android:inputType="phone"
-        android:minHeight="48dp" />
-
-    <EditText
-        android:id="@+id/et_sms_content"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:hint="内容"
-        android:inputType="text"
         android:minHeight="48dp" />
 
 </LinearLayout>

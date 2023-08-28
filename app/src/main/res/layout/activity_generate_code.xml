@@ -47,7 +47,6 @@
         android:ems="10"
         android:hint="在此输入要生成的文本内容"
         android:inputType="textMultiLine"
-        android:maxLength="420"
         android:maxLines="5"
         android:minHeight="48dp"
         android:scrollbars="vertical"

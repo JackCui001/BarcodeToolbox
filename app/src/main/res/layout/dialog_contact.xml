@@ -1,11 +1,23 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_marginTop="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="姓名"
+            android:textColor="@color/black"
+            android:textSize="19sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -43,10 +55,13 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="8dp"
                 android:text="电话"
                 android:textColor="@color/black"
-                android:textSize="16sp" />
+                android:textSize="19sp" />
 
             <EditText
                 android:id="@+id/et_contact_office_phone"
@@ -79,6 +94,17 @@
                 android:minHeight="48dp" />
         </LinearLayout>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="其他信息"
+            android:textColor="@color/black"
+            android:textSize="19sp" />
+
         <EditText
             android:id="@+id/et_contact_email"
             android:layout_width="match_parent"
@@ -109,6 +135,16 @@
             android:inputType="text"
             android:minHeight="48dp" />
 
+        <EditText
+            android:id="@+id/et_contact_website"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:hint="网站"
+            android:inputType="text"
+            android:minHeight="48dp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -117,10 +153,13 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="8dp"
                 android:text="地址"
                 android:textColor="@color/black"
-                android:textSize="16sp" />
+                android:textSize="19sp" />
 
             <EditText
                 android:id="@+id/et_contact_country"
@@ -172,15 +211,5 @@
                 android:inputType="text"
                 android:minHeight="48dp" />
         </LinearLayout>
-
-        <EditText
-            android:id="@+id/et_contact_website"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:hint="网站"
-            android:inputType="text"
-            android:minHeight="48dp" />
     </LinearLayout>
 </ScrollView>

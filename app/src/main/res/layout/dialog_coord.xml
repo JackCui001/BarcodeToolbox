@@ -4,24 +4,24 @@
     android:orientation="vertical">
 
     <EditText
-        android:id="@+id/et_sms_phone"
+        android:id="@+id/et_coord_longitude"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="4dp"
         android:layout_marginTop="16dp"
         android:layout_marginRight="4dp"
-        android:hint="收信人"
-        android:inputType="phone"
+        android:hint="经度"
+        android:inputType="numberSigned|numberDecimal"
         android:minHeight="48dp" />
 
     <EditText
-        android:id="@+id/et_sms_content"
+        android:id="@+id/et_coord_latitude"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
-        android:hint="内容"
-        android:inputType="text"
+        android:hint="纬度"
+        android:inputType="numberSigned|numberDecimal"
         android:minHeight="48dp" />
 
 </LinearLayout>

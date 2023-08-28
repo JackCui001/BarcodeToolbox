@@ -5,17 +5,21 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.text.Html
+import android.text.SpannableStringBuilder
+import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.text.set
 import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import com.huawei.hms.hmsscankit.ScanUtil
@@ -33,9 +37,8 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var lastHtmlStr: String
-
     //    private lateinit var prefix: String
+
     private var scanCnt = 0
     private var parse = true
 
@@ -49,6 +52,7 @@ class MainActivity : AppCompatActivity() {
         const val CAM_SCAN_REQ_CODE = 3
         const val TAG = "BarcodeScanner"
         const val WAIT_FOR_SCAN = "等待识别"
+        const val WAIT_FOR_SCAN_COLOR_HEX = "#7400FF"
         const val INVOKED_BY_INTENT_VIEW = "【由外部应用打开文件调用】"
         const val INVOKED_BY_INTENT_SEND = "【由外部应用分享文件调用】"
 
@@ -73,8 +77,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.tvOutput.text = WAIT_FOR_SCAN
-        lastHtmlStr = WAIT_FOR_SCAN
+        // Init str
+        binding.tvOutput.text =
+            SpannableStringBuilder().appendMySpan(WAIT_FOR_SCAN, WAIT_FOR_SCAN_COLOR_HEX, null)
 
         // 读取设置
         readSettings()
@@ -104,8 +109,8 @@ class MainActivity : AppCompatActivity() {
         binding.fabClear.setOnClickListener {
             Log.d(TAG, "tvOutput Cleared")
             showSnackbar(binding.fabSetting, "输出信息已清空", Snackbar.LENGTH_SHORT)
-            binding.tvOutput.text = WAIT_FOR_SCAN
-            lastHtmlStr = WAIT_FOR_SCAN
+            binding.tvOutput.text =
+                SpannableStringBuilder().appendMySpan(WAIT_FOR_SCAN, WAIT_FOR_SCAN_COLOR_HEX, null)
             scanCnt = 0
         }
 
@@ -207,60 +212,50 @@ class MainActivity : AppCompatActivity() {
         emptyRes: Boolean = false
     ) {
         val codeAmt = results.size
-        val newText = StringBuilder()
-        if (lastHtmlStr != WAIT_FOR_SCAN) {
-            newText.append(lastHtmlStr)
+        val newText = SpannableStringBuilder()
+        if (binding.tvOutput.text.toString() != WAIT_FOR_SCAN) {
+            newText.append(binding.tvOutput.text)
         }
         if (multiPicAmt == -1 || multiPicIdx == 0) {
-            newText.append(
-                getHtmlStr(
-                    "---------- 第 ${++scanCnt} 次识别 ----------<br>",
-                    "#7400FF",
-                    "small"
-                )
-            )
+            newText.appendMySpan("---------- 第 ${++scanCnt} 次识别 ----------\n", "#7400FF", 0.8)
         }
         if (multiPicIdx == 0) {
-            newText.append(getHtmlStr("检测到多图，数量：$multiPicAmt<br>", "#1565C0", "small"))
+            newText.appendMySpan("检测到多图，数量：$multiPicAmt\n", "#1565C0", 0.8)
         }
         if (multiPicIdx != -1) {
-            newText.append(
-                getHtmlStr(
-                    "---------- 图 ${multiPicIdx + 1} ----------<br>",
-                    "#1565C0",
-                    "small"
-                )
-            )
+            newText.appendMySpan("---------- 图 ${multiPicIdx + 1} ----------\n", "#1565C0", 0.8)
         }
         if (emptyRes) {
-            newText.append("无结果<br>")
+            newText.append("无结果\n")
         } else {
             if (codeAmt > 1) {
-                newText.append(getHtmlStr("检测到多码，数量：$codeAmt<br>", "#F57C00", "small"))
+                newText.appendMySpan("检测到多码，数量：$codeAmt\n", "#F57C00", 0.8)
                 for (i in 0 until codeAmt) {
-                    newText.append(
-                        getHtmlStr(
-                            "---------- 码 ${i + 1} ----------<br>",
-                            "#F57C00",
-                            "small"
-                        )
-                    )
+                    newText.appendMySpan("---------- 码 ${i + 1} ----------\n", "#F57C00", 0.8)
                     newText.append(concatCodeInfo(results[i]))
                 }
             } else {
                 newText.append(concatCodeInfo(results[0]))
             }
         }
-        lastHtmlStr = newText.toString().replace("\n", "<br>")
-        binding.tvOutput.text = Html.fromHtml(lastHtmlStr)
+        binding.tvOutput.text = newText
     }
 
-    private fun getHtmlStr(str: String, colorHex: String, fontSize: String = ""): String {
-        return if (fontSize.isEmpty()) {
-            "<font color=\"$colorHex\">$str</font>"
-        } else {
-            "<font color=\"$colorHex\"><$fontSize>$str</$fontSize></font>"
+    private fun SpannableStringBuilder.appendMySpan(
+        str: String,
+        colorHex: String? = null,
+        relativeFontSize: Double? = null
+    ): SpannableStringBuilder {
+        val start = this.length
+        val end = this.length + str.length
+        this.append(str)
+        colorHex?.let {
+            this[start, end] = ForegroundColorSpan(Color.parseColor(colorHex))
         }
+        relativeFontSize?.let {
+            this[start, end] = RelativeSizeSpan(it.toFloat())
+        }
+        return this
     }
 
     /**
@@ -447,23 +442,23 @@ class MainActivity : AppCompatActivity() {
                     for (tel in tels) {
                         when (tel.getUseType()) {
                             TelPhoneNumber.CELLPHONE_NUMBER_USE_TYPE -> {
-                                newText.append("手机： ")
+                                newText.append("  手机： ")
                             }
 
                             TelPhoneNumber.RESIDENTIAL_USE_TYPE -> {
-                                newText.append("住家： ")
+                                newText.append("  住家： ")
                             }
 
                             TelPhoneNumber.OFFICE_USE_TYPE -> {
-                                newText.append("办公： ")
+                                newText.append("  办公： ")
                             }
 
                             TelPhoneNumber.FAX_USE_TYPE -> {
-                                newText.append("传真： ")
+                                newText.append("  传真： ")
                             }
 
                             TelPhoneNumber.OTHER_USE_TYPE -> {
-                                newText.append("其他： ")
+                                newText.append("  其他： ")
                             }
                         }
                         newText.append(tel.getTelPhoneNumber())
@@ -499,15 +494,15 @@ class MainActivity : AppCompatActivity() {
                     for (addrInfo in addrInfoList) {
                         when (addrInfo.getAddressType()) {
                             AddressInfo.RESIDENTIAL_USE_TYPE -> {
-                                newText.append("住家： ")
+                                newText.append("  住家： ")
                             }
 
                             AddressInfo.OFFICE_TYPE -> {
-                                newText.append("办公： ")
+                                newText.append("  办公： ")
                             }
 
                             AddressInfo.OTHER_USE_TYPE -> {
-                                newText.append("其他： ")
+                                newText.append("  其他： ")
                             }
                         }
                         newText.append(addrInfo.getAddressDetails().toList().joinToString())
@@ -796,7 +791,7 @@ class MainActivity : AppCompatActivity() {
                 val pwd = tmp.getPassword()
                 val cipherMode = tmp.getCipherMode()
                 if (!ssid.isNullOrEmpty()) {
-                    newText.append("热点名称 (SSID)： ")
+                    newText.append("接入点名称： ")
                     newText.append(ssid)
                     newText.append("\n")
                 }
@@ -824,8 +819,8 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 newText.append("\n")
-                newText.append("隐藏网络： ")
-                if (res.getOriginalValue().indexOf("H: true", ignoreCase = true) != -1) {
+                newText.append("隐藏： ")
+                if (res.getOriginalValue().contains("H: true", ignoreCase = true)) {
                     newText.append("是")
                 } else {
                     newText.append("否")
