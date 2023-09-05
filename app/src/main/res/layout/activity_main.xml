@@ -63,6 +63,15 @@
             app:maxImageSize="22dp" />
 
         <com.nambimobile.widgets.efab.FabOption
+            android:id="@+id/fab_scan_take_photo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_icon="@drawable/outline_add_a_photo_24"
+            app:label_hiddenToVisibleAnimationDurationMs="25"
+            app:label_text="拍照扫描"
+            app:maxImageSize="22dp" />
+
+        <com.nambimobile.widgets.efab.FabOption
             android:id="@+id/fab_scan_pic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -87,6 +96,15 @@
             app:fab_icon="@drawable/outline_settings_24"
             app:label_hiddenToVisibleAnimationDurationMs="25"
             app:label_text="设置"
+            app:maxImageSize="22dp" />
+
+        <com.nambimobile.widgets.efab.FabOption
+            android:id="@+id/fab_help"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_icon="@drawable/outline_help_outline_24"
+            app:label_hiddenToVisibleAnimationDurationMs="25"
+            app:label_text="帮助"
             app:maxImageSize="22dp" />
 
     </com.nambimobile.widgets.efab.ExpandableFabLayout>

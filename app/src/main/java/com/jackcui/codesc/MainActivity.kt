@@ -1,7 +1,6 @@
 package com.jackcui.codesc
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -10,15 +9,17 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.provider.Settings
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.util.Log
 import android.view.View
-import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.FileProvider
 import androidx.core.text.set
 import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
@@ -33,13 +34,36 @@ import com.jackcui.codesc.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    //    private lateinit var prefix: String
+    private var multiScanPrefix: String? = null
+    private var multiPicPrefix: String? = null
+    private var multiCodePrefix: String? = null
+    private var saveImageUri: Uri? = null
 
-    private var scanCnt = 0
+    // 定义Activity result launcher
+    private val takePhotoLauncher =
+        registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            if (success) {
+                saveImageUri?.let {
+                    scanPic(MediaStore.Images.Media.getBitmap(contentResolver, it))
+                }
+            }
+        }
+    private val pickFilesLauncher =
+        registerForActivityResult(ActivityResultContracts.GetMultipleContents())
+        {
+            if (it.size == 1) {
+                scanPic(uri = it[0])
+            } else {
+                for (i in it.indices) {
+                    scanPic(uri = it[i], multiPicIdx = i, multiPicAmt = it.size)
+                }
+            }
+        }
+    private var scanCnt = 1
     private var parse = true
 
 
@@ -47,21 +71,20 @@ class MainActivity : AppCompatActivity() {
         /**
          * Define requestCode.
          */
-        const val MULTIPLE_FILE_CHOICE_REQ_CODE = 1
-        const val REQUEST_SCAN_PERM_REQ_CODE = 2
-        const val CAM_SCAN_REQ_CODE = 3
-        const val TAG = "BarcodeScanner"
+        const val REQ_HW_SCAN_PERM_REQ_CODE = 1
+        const val HW_SCAN_REQ_CODE = 2
+        const val REQ_CAM_SCAN_PERM_REQ_CODE = 3
+        const val TAG = "CodeScanner"
         const val WAIT_FOR_SCAN = "等待识别"
-        const val WAIT_FOR_SCAN_COLOR_HEX = "#7400FF"
         const val INVOKED_BY_INTENT_VIEW = "【由外部应用打开文件调用】"
         const val INVOKED_BY_INTENT_SEND = "【由外部应用分享文件调用】"
 
-        fun showToast(context: Context, msg: String, duration: Int) {
-            GlobalScope.launch(Dispatchers.Main)
-            {
-                Toast.makeText(context, msg, duration).show()
-            }
-        }
+//        fun showToast(context: Context, msg: String, duration: Int) {
+//            GlobalScope.launch(Dispatchers.Main)
+//            {
+//                Toast.makeText(context, msg, duration).show()
+//            }
+//        }
 
         fun showSnackbar(view: View, msg: String, duration: Int) {
             GlobalScope.launch(Dispatchers.Main)
@@ -79,10 +102,7 @@ class MainActivity : AppCompatActivity() {
 
         // Init str
         binding.tvOutput.text =
-            SpannableStringBuilder().appendMySpan(WAIT_FOR_SCAN, WAIT_FOR_SCAN_COLOR_HEX, null)
-
-        // 读取设置
-        readSettings()
+            SpannableStringBuilder().appendMySpan(WAIT_FOR_SCAN, "#7400FF", null)
 
         // Get intent, action and MIME type
         val intent = intent
@@ -94,49 +114,62 @@ class MainActivity : AppCompatActivity() {
             if (!type.startsWith("image/")) {
                 showSnackbar(binding.fabSetting, "导入了错误的文件类型！", Snackbar.LENGTH_LONG)
             } else if (action == Intent.ACTION_SEND) {
-                binding.tvOutput.text = INVOKED_BY_INTENT_SEND
+                binding.tvOutput.text = SpannableStringBuilder().appendMySpan(
+                    "$INVOKED_BY_INTENT_SEND\n",
+                    "#FF4400",
+                    1.1
+                )
                 handleSendImage(intent) // Handle single image being sent
             } else if (action == Intent.ACTION_SEND_MULTIPLE) {
-                binding.tvOutput.text = INVOKED_BY_INTENT_SEND
+                binding.tvOutput.text = SpannableStringBuilder().appendMySpan(
+                    "$INVOKED_BY_INTENT_SEND\n",
+                    "#FF4400",
+                    1.1
+                )
                 handleSendMultipleImages(intent) // Handle multiple images being sent
             } else if (action == Intent.ACTION_VIEW) {
-                binding.tvOutput.text = INVOKED_BY_INTENT_VIEW
+                binding.tvOutput.text = SpannableStringBuilder().appendMySpan(
+                    "$INVOKED_BY_INTENT_VIEW\n",
+                    "#FF4400",
+                    1.1
+                )
                 handleViewImage(intent) // Handle single image being viewed
             }
         }
 
-        // 处理选项1点击事件
         binding.fabClear.setOnClickListener {
             Log.d(TAG, "tvOutput Cleared")
             showSnackbar(binding.fabSetting, "输出信息已清空", Snackbar.LENGTH_SHORT)
             binding.tvOutput.text =
-                SpannableStringBuilder().appendMySpan(WAIT_FOR_SCAN, WAIT_FOR_SCAN_COLOR_HEX, null)
-            scanCnt = 0
+                SpannableStringBuilder().appendMySpan(WAIT_FOR_SCAN, "#7400FF", null)
+            scanCnt = 1
         }
 
-
-        // 处理选项2点击事件
         binding.fabScanCam.setOnClickListener {
-            reqPermAndScan()
+            reqPerm(true)
         }
 
-        // 处理选项3点击事件
+        binding.fabScanTakePhoto.setOnClickListener {
+            reqPerm(false)
+        }
+
         binding.fabScanPic.setOnClickListener {
-            val chooseFile = Intent(Intent.ACTION_GET_CONTENT)
-            chooseFile.type = "image/*" //选择图片
-            chooseFile.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true) //设置可以多选文件
-            val chooser = Intent.createChooser(chooseFile, "选择图片")
-            startActivityForResult(chooser, MULTIPLE_FILE_CHOICE_REQ_CODE)
+
+            pickFilesLauncher.launch("image/*")
         }
 
-        // 处理选项4点击事件
         binding.fabGenCode.setOnClickListener {
             startActivity(Intent(this, GenerateCodeActivity::class.java))
         }
 
-        // 处理选项5点击事件
         binding.fabSetting.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
+        }
+
+        binding.fabHelp.setOnClickListener {
+            AlertDialog.Builder(this).setTitle("帮助")
+                .setMessage("欢迎使用此应用！\n本应用虽然名叫“扫码仪”，但实际上不仅提供了各类码的扫描识别功能，还提供了构建功能。\n支持外部应用导入图片扫描，在外部应用选择打开或分享图片并选择此应用即可。\n扫描码内容的同时可以解析提取各类有效信息，而不必纠结于原始字符串的含义。\n构建功能仍处于Beta阶段，有问题可以随时和开发者反馈。\n下列功能支持一图多码扫描：\n图片扫描，拍照扫描\n\n开发者：酷安@威尼斯的向日葵")
+                .show()
         }
     }
 
@@ -149,7 +182,9 @@ class MainActivity : AppCompatActivity() {
         // 获取 SharedPreferences 对象
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         // 读取字符串值，如果找不到对应的键，则返回默认值
-//        prefix = sharedPreferences.getString("prefix", "null").toString()
+        multiScanPrefix = sharedPreferences.getString("multi_scan_prefix", null)
+        multiPicPrefix = sharedPreferences.getString("multi_pic_prefix", null)
+        multiCodePrefix = sharedPreferences.getString("multi_code_prefix", null)
         // 读取布尔值
         parse = sharedPreferences.getBoolean("parse", true)
     }
@@ -157,14 +192,14 @@ class MainActivity : AppCompatActivity() {
     private fun handleViewImage(intent: Intent) {
         val imgUri = intent.data
         imgUri?.let {
-            scanPic(it)
+            scanPic(uri = it)
         }
     }
 
     private fun handleSendImage(intent: Intent) {
         val imgUri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
         imgUri?.let {
-            scanPic(it)
+            scanPic(uri = it)
         }
     }
 
@@ -175,10 +210,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun scanPic(uri: Uri, multiPicIdx: Int = -1, multiPicAmt: Int = -1) {
-        val img: Bitmap
-        try {
-            img = MediaStore.Images.Media.getBitmap(contentResolver, uri)
+    private fun scanPic(
+        bitmap: Bitmap? = null,
+        uri: Uri? = null,
+        multiPicIdx: Int = -1,
+        multiPicAmt: Int = -1
+    ) {
+        if (bitmap == null && uri == null) {
+            return
+        }
+        val img = bitmap ?: try {
+            MediaStore.Images.Media.getBitmap(contentResolver, uri)
         } catch (e: Exception) {
             e.printStackTrace()
             showSnackbar(binding.fabSetting, "图片读取失败！", Snackbar.LENGTH_LONG)
@@ -201,7 +243,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun scanPics(uris: List<Uri>) {
         for (i in uris.indices) {
-            scanPic(uris[i], i, uris.size)
+            scanPic(uri = uris[i], multiPicIdx = i, multiPicAmt = uris.size)
         }
     }
 
@@ -217,13 +259,24 @@ class MainActivity : AppCompatActivity() {
             newText.append(binding.tvOutput.text)
         }
         if (multiPicAmt == -1 || multiPicIdx == 0) {
-            newText.appendMySpan("---------- 第 ${++scanCnt} 次识别 ----------\n", "#7400FF", 0.8)
+            var prefix = "---------- 第 $scanCnt 次识别 ----------"
+            if (!multiScanPrefix.isNullOrEmpty()) {
+                val strSplit = multiScanPrefix!!.split("{n}")
+                prefix = "${strSplit[0]}$scanCnt${strSplit[1]}"
+            }
+            newText.appendMySpan("$prefix\n", "#7400FF", 0.8)
+            scanCnt++
         }
         if (multiPicIdx == 0) {
             newText.appendMySpan("检测到多图，数量：$multiPicAmt\n", "#1565C0", 0.8)
         }
         if (multiPicIdx != -1) {
-            newText.appendMySpan("---------- 图 ${multiPicIdx + 1} ----------\n", "#1565C0", 0.8)
+            var prefix = "---------- 图 ${multiPicIdx + 1} ----------"
+            if (!multiPicPrefix.isNullOrEmpty()) {
+                val strSplit = multiPicPrefix!!.split("{n}")
+                prefix = "${strSplit[0]}${multiPicIdx + 1}${strSplit[1]}"
+            }
+            newText.appendMySpan("$prefix\n", "#1565C0", 0.8)
         }
         if (emptyRes) {
             newText.append("无结果\n")
@@ -231,7 +284,12 @@ class MainActivity : AppCompatActivity() {
             if (codeAmt > 1) {
                 newText.appendMySpan("检测到多码，数量：$codeAmt\n", "#F57C00", 0.8)
                 for (i in 0 until codeAmt) {
-                    newText.appendMySpan("---------- 码 ${i + 1} ----------\n", "#F57C00", 0.8)
+                    var prefix = "---------- 码 ${i + 1} ----------"
+                    if (!multiCodePrefix.isNullOrEmpty()) {
+                        val strSplit = multiCodePrefix!!.split("{n}")
+                        prefix = "${strSplit[0]}${multiPicIdx + 1}${strSplit[1]}"
+                    }
+                    newText.appendMySpan("$prefix\n", "#F57C00", 0.8)
                     newText.append(concatCodeInfo(results[i]))
                 }
             } else {
@@ -261,14 +319,18 @@ class MainActivity : AppCompatActivity() {
     /**
      * Apply for permissions.
      */
-    private fun reqPermAndScan() {
+    private fun reqPerm(hwScan: Boolean) {
         val perms = mutableListOf(Manifest.permission.CAMERA)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             perms.add(Manifest.permission.READ_MEDIA_IMAGES)
         } else {
             perms.add(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
-        ActivityCompat.requestPermissions(this, perms.toTypedArray(), REQUEST_SCAN_PERM_REQ_CODE)
+        ActivityCompat.requestPermissions(
+            this,
+            perms.toTypedArray(),
+            if (hwScan) REQ_HW_SCAN_PERM_REQ_CODE else REQ_CAM_SCAN_PERM_REQ_CODE
+        )
     }
 
     /**
@@ -287,16 +349,38 @@ class MainActivity : AppCompatActivity() {
         for (i in grantResults.indices) {
             if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                 Log.d(TAG, "${permissions[i]} granted: false")
-                AlertDialog.Builder(this).setTitle("提示")
-                    .setMessage("权限授予失败，请允许授予权限以正常使用此应用。\n本应用仅申请必要权限，请放心授权。")
-                    .setNegativeButton("关闭") { _, _ ->
-                    }.show()
+                val shouldRequestPermission =
+                    ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[i])
+                if (shouldRequestPermission) {
+                    // 用户拒绝权限授权
+                    AlertDialog.Builder(this).setTitle("提示")  // 设置对话框的标题文本
+                        .setMessage("权限请求被拒绝，请允许授予权限以正常使用此应用。\n本应用仅申请必要权限，请放心授权。")  // 设置对话框的内容文本
+                        .setPositiveButton("确认") { _, _ ->
+                            return@setPositiveButton
+                        }.show()
+                } else {
+                    // 用户拒绝权限授权，并且点了“不再询问”权限
+                    AlertDialog.Builder(this).setTitle("提示")  // 设置对话框的标题文本
+                        .setMessage("权限请求被永久拒绝，请在系统设置中手动授权。\n本应用仅申请必要权限，请放心授权。")  // 设置对话框的内容文本
+                        .setCancelable(false).setPositiveButton("确认") { _, _ ->
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            val uri = Uri.fromParts("package", packageName, null)
+                            intent.data = uri
+                            startActivity(intent)
+                        }.show()
+                }
                 return
             }
         }
+
         // Default View Mode
-        if (requestCode == REQUEST_SCAN_PERM_REQ_CODE) {
-            ScanUtil.startScan(this, CAM_SCAN_REQ_CODE, null)
+        if (requestCode == REQ_HW_SCAN_PERM_REQ_CODE) {
+            ScanUtil.startScan(this, HW_SCAN_REQ_CODE, null)
+        } else if (requestCode == REQ_CAM_SCAN_PERM_REQ_CODE) {
+            val file = File.createTempFile("tmp", ".jpg", this.externalCacheDir)
+            val uri = FileProvider.getUriForFile(this, "com.jackcui.codesc.fileprovider", file)
+            saveImageUri = uri
+            takePhotoLauncher.launch(uri)
         }
     }
 
@@ -307,49 +391,37 @@ class MainActivity : AppCompatActivity() {
      * @param resultCode  Result code.
      * @param data        Result.
      */
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != RESULT_OK || data == null) {
             return
         }
-        if (requestCode == CAM_SCAN_REQ_CODE) {
+        if (requestCode == HW_SCAN_REQ_CODE) {
             val res = data.getParcelableExtra<HmsScan>(ScanUtil.RESULT)
             res?.let {
                 printResults(arrayOf(it))
             }
         }
-        if (requestCode == MULTIPLE_FILE_CHOICE_REQ_CODE) {
-            val cd = data.clipData
-            val multiFile = cd != null
-            if (multiFile) {
-                for (i in 0 until cd!!.itemCount) {
-                    val item = cd.getItemAt(i)
-                    scanPic(item.uri, i, cd.itemCount)
-                }
-            } else {
-                data.data?.let {
-                    scanPic(it)
-                }
-            }
-        }
-    }
-
-    override fun attachBaseContext(newBase: Context) {
-        super.attachBaseContext(newBase)
-        overrideFontScale(newBase)
     }
 
     /**
      * 重置配置 fontScale：保持字体比例不变，始终为 1.
      */
-    private fun overrideFontScale(context: Context?) {
-        if (context == null) {
-            return
-        }
-        val configuration = context.resources.configuration
-        configuration.fontScale = 1f
-        applyOverrideConfiguration(configuration)
-    }
+
+//    override fun attachBaseContext(newBase: Context) {
+//        super.attachBaseContext(newBase)
+//        overrideFontScale(newBase)
+//    }
+
+//    private fun overrideFontScale(context: Context?) {
+//        if (context == null) {
+//            return
+//        }
+//        val configuration = context.resources.configuration
+//        configuration.fontScale = 1f
+//        applyOverrideConfiguration(configuration)
+//    }
 
     private fun concatCodeInfo(res: HmsScan): String {
         val scanType = res.getScanType()

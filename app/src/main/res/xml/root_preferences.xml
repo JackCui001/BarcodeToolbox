@@ -1,23 +1,30 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory app:title="扫码">
         <SwitchPreference
-            android:defaultValue="true"
-            android:key="parse"
+            app:defaultValue="true"
+            app:key="parse"
             app:summaryOff="输出原始字符串"
             app:summaryOn="输出解析后的数据"
             app:title="码值解析" />
-        <!--        <EditTextPreference-->
-        <!--            app:key="prefix"-->
-        <!--            app:title="自定义前缀"-->
-        <!--            app:useSimpleSummaryProvider="true" />-->
+        <EditTextPreference
+            app:key="multi_scan_prefix"
+            app:title="自定义扫描前缀"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="multi_pic_prefix"
+            app:title="自定义多图前缀"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="multi_code_prefix"
+            app:title="自定义多码前缀"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="构建码">
         <SwitchPreference
-            android:defaultValue="true"
-            android:key="showCodeTypeInfo"
+            app:defaultValue="true"
+            app:key="show_code_type_info"
             app:summaryOff="选定码型后不会弹窗展示特定要求"
             app:summaryOn="选定码型后弹窗展示特定要求"
             app:title="展示码型说明" />

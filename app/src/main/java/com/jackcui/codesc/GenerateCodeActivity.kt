@@ -75,9 +75,6 @@ class GenerateCodeActivity : AppCompatActivity() {
         supportActionBar?.title = "构建码"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        // 读取设置
-        readSettings()
-
         val codeType = intArrayOf(
             HmsScan.QRCODE_SCAN_TYPE,
             HmsScan.AZTEC_SCAN_TYPE,
@@ -100,14 +97,7 @@ class GenerateCodeActivity : AppCompatActivity() {
 
         binding.tvLenInd.text = "剩余可用字节：${maxBytes[0]}"
         binding.etGenContent.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(
-                s: CharSequence,
-                start: Int,
-                count: Int,
-                after: Int
-            ) {
-            }
-
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable) {
                 binding.tvLenInd.text =
@@ -230,23 +220,20 @@ class GenerateCodeActivity : AppCompatActivity() {
         val sdf = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS", Locale.CHINA)
 
         // Create a new image file
-        val fileName = "${sdf.format(Date())}_${codeTypeStrArr[codePreviewIdx]}.png"
-        val filePath: String
-        var filePathAndName: String
+        val filename = "${sdf.format(Date())}_${codeTypeStrArr[codePreviewIdx]}.png"
+        val filePath =
+            "${Environment.getExternalStorageDirectory().path}${File.separator}${Environment.DIRECTORY_PICTURES}${File.separator}CodeScanner"
+        val filePathAndName = "$filePath${File.separator}$filename"
         val imageDetails = ContentValues().apply {
             put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-            put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+            put(MediaStore.Images.Media.DISPLAY_NAME, filename)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val relativeFilePath =
+                put(
+                    MediaStore.Images.Media.RELATIVE_PATH,
                     "${Environment.DIRECTORY_PICTURES}${File.separator}CodeScanner"
-                filePathAndName =
-                    "${Environment.getExternalStorageDirectory().path}${File.separator}${Environment.DIRECTORY_PICTURES}${File.separator}CodeScanner${File.separator}$fileName"
-                put(MediaStore.Images.Media.RELATIVE_PATH, relativeFilePath)
+                )
                 put(MediaStore.Images.Media.IS_PENDING, 1)
             } else {
-                filePath =
-                    "${Environment.getExternalStorageDirectory().path}${File.separator}${Environment.DIRECTORY_PICTURES}${File.separator}CodeScanner"
-                filePathAndName = filePath + "${File.separator}$fileName"
                 val folder = File(filePath)
                 if (!folder.exists()) {
                     folder.mkdirs()
@@ -547,6 +534,6 @@ class GenerateCodeActivity : AppCompatActivity() {
 
     private fun readSettings() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        showCodeTypeInfo = sharedPreferences.getBoolean("showCodeTypeInfo", true)
+        showCodeTypeInfo = sharedPreferences.getBoolean("show_code_type_info", true)
     }
 }
