@@ -15,8 +15,7 @@
         <item>Codabar</item>
     </string-array>
     <string-array name="cipher">
-        <item>WPA</item>
-        <item>WPA2</item>
+        <item>WPA/WPA2</item>
         <item>WPA3</item>
         <item>WEP</item>
         <item>无</item>

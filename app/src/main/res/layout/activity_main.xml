@@ -7,8 +7,30 @@
     tools:context=".MainActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_anchorGravity="center">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/topAppBarLayout"
+            style="@style/Widget.App.Toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/topAppBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="?attr/actionBarSize"
+                app:menu="@menu/top_app_bar"
+                app:title="扫码仪"
+                app:titleCentered="true" />
+
+        </com.google.android.material.appbar.AppBarLayout>
 
         <TextView
             android:id="@+id/tv_output"
@@ -17,22 +39,22 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
             android:autoLink="web|email|map"
             android:textAlignment="textStart"
-            android:textColor="#000000"
             android:textIsSelectable="true"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/topAppBarLayout"
             tools:text="@tools:sample/date/mmddyy" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.nambimobile.widgets.efab.ExpandableFabLayout
+        android:id="@+id/expandableFabLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_anchorGravity="center">
 
         <!-- The next 3 Views will only display in portrait orientation -->
 
@@ -41,72 +63,49 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_marginEnd="24dp"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="24dp"
+            app:efab_color="?attr/colorEfab" />
 
         <com.nambimobile.widgets.efab.FabOption
             android:id="@+id/fab_clear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:fab_color="?attr/colorEfab"
             app:fab_icon="@drawable/outline_delete_sweep_24"
             app:fab_orientation="portrait"
-            app:label_hiddenToVisibleAnimationDurationMs="25"
-            app:label_text="清空输出"
+            app:label_hiddenToVisibleAnimationDurationMs="100"
+            app:label_text="清屏"
             app:maxImageSize="22dp" />
 
         <com.nambimobile.widgets.efab.FabOption
-            android:id="@+id/fab_scan_cam"
+            android:id="@+id/fab_scan_code"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:fab_color="?attr/colorEfab"
             app:fab_icon="@drawable/outline_qr_code_scanner_24"
-            app:label_hiddenToVisibleAnimationDurationMs="25"
-            app:label_text="实时扫描"
-            app:maxImageSize="22dp" />
-
-        <com.nambimobile.widgets.efab.FabOption
-            android:id="@+id/fab_scan_take_photo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fab_icon="@drawable/outline_add_a_photo_24"
-            app:label_hiddenToVisibleAnimationDurationMs="25"
-            app:label_text="拍照扫描"
-            app:maxImageSize="22dp" />
-
-        <com.nambimobile.widgets.efab.FabOption
-            android:id="@+id/fab_scan_pic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fab_icon="@drawable/outline_document_scanner_24"
-            app:label_hiddenToVisibleAnimationDurationMs="25"
-            app:label_text="图片扫描"
+            app:label_hiddenToVisibleAnimationDurationMs="100"
+            app:label_text="扫码"
             app:maxImageSize="22dp" />
 
         <com.nambimobile.widgets.efab.FabOption
             android:id="@+id/fab_gen_code"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:fab_color="?attr/colorEfab"
             app:fab_icon="@drawable/outline_add_to_photos_24"
-            app:label_hiddenToVisibleAnimationDurationMs="25"
+            app:label_hiddenToVisibleAnimationDurationMs="100"
             app:label_text="构建码"
             app:maxImageSize="22dp" />
 
         <com.nambimobile.widgets.efab.FabOption
-            android:id="@+id/fab_setting"
+            android:id="@+id/fab_history"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:fab_icon="@drawable/outline_settings_24"
-            app:label_hiddenToVisibleAnimationDurationMs="25"
-            app:label_text="设置"
-            app:maxImageSize="22dp" />
-
-        <com.nambimobile.widgets.efab.FabOption
-            android:id="@+id/fab_help"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fab_icon="@drawable/outline_help_outline_24"
-            app:label_hiddenToVisibleAnimationDurationMs="25"
-            app:label_text="帮助"
+            app:fab_color="?attr/colorEfab"
+            app:fab_icon="@drawable/outline_history_24"
+            app:label_hiddenToVisibleAnimationDurationMs="100"
+            app:label_text="历史记录"
             app:maxImageSize="22dp" />
 
     </com.nambimobile.widgets.efab.ExpandableFabLayout>
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

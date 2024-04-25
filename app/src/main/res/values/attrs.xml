@@ -1,0 +1,8 @@
+
+<resources>
+    <attr name="colorEfab" format="color" />
+    <attr name="colorOnEfab" format="color" />
+    <attr name="colorEfabContainer" format="color" />
+    <attr name="colorOnEfabContainer" format="color" />
+    <attr name="harmonizeEfab" format="boolean" />
+</resources>

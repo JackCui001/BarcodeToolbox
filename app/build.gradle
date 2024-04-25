@@ -11,8 +11,8 @@ android {
         applicationId "com.jackcui.codesc"
         minSdk 19
         targetSdk 34
-        versionCode 1
-        versionName "1.1"
+        versionCode 2404251
+        versionName "1.2"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -33,15 +33,23 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.10.1'
-    implementation 'com.huawei.hms:scanplus:2.11.0.300'
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'com.huawei.hms:scanplus:2.12.0.301'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.nambimobile.widgets:expandable-fab:1.2.1'
-    implementation 'androidx.preference:preference-ktx:1.2.0'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
+    implementation 'com.github.getActivity:XXPermissions:18.63'
+    implementation 'com.github.getActivity:Toaster:12.6'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.46.android4'
+//    implementation 'com.github.knightwood:material3-preference:1.4'
+//    implementation 'org.jetbrains.kotlin:kotlin-reflect:2.0.0-RC1'
 }

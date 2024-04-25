@@ -20,6 +20,16 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# Disable debug logcat in release version
+-assumenosideeffects class android.util.Log {
+     public static *** *(...);
+}
+-assumenosideeffects class java.io.PrintStream {
+    public *** println(...);
+    public *** print(...);
+}
+
+# HUAWEI ScanKit
 -ignorewarnings
 -keepattributes *Annotation*
 -keepattributes Exceptions
@@ -29,12 +39,7 @@
 -keep class com.huawei.hianalytics.**{*;}
 -keep class com.huawei.updatesdk.**{*;}
 -keep class com.huawei.hms.**{*;}
-#-printusage usage.txt
-#-printseeds seeds.txt
--assumenosideeffects class android.util.Log {
-     public static *** *(...);
-}
--assumenosideeffects class java.io.PrintStream {
-    public *** println(...);
-    public *** print(...);
-}
+
+# hjq's modules
+-keep class com.hjq.permissions.** {*;}
+-keep class com.hjq.toast.** {*;}
