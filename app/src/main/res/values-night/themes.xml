@@ -1,5 +1,5 @@
-
 <resources>
+
     <style name="Theme.codeSc" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorEfab">#388E3C</item>
         <item name="colorOnEfab">#ffffff</item>
@@ -9,16 +9,6 @@
 
         <item name="alertDialogTheme">@style/ThemeOverlay.Material3.MaterialAlertDialog</item>
         <item name="dialogCornerRadius">28dp</item>
-        <item name="toolbarStyle">@style/Widget.App.Toolbar</item>
     </style>
 
-
-    <style name="Widget.App.Toolbar" parent="Widget.Material3.Toolbar">
-        <item name="materialThemeOverlay">@style/ThemeOverlay.App.Toolbar</item>
-    </style>
-
-    <style name="ThemeOverlay.App.Toolbar" parent="">
-        <item name="colorSurface">@color/md_theme_dark_primaryContainer</item>
-        <item name="colorOnSurface">@color/md_theme_dark_onPrimaryContainer</item>
-    </style>
 </resources>

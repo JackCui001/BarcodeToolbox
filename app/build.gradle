@@ -11,7 +11,7 @@ android {
         applicationId "com.jackcui.codesc"
         minSdk 19
         targetSdk 34
-        versionCode 2404251
+        versionCode 2404261
         versionName "1.2"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -39,7 +39,7 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.core:core-ktx:1.13.0'
     implementation 'com.huawei.hms:scanplus:2.12.0.301'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
