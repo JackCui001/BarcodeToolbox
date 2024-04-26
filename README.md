@@ -1,4 +1,3 @@
-
 # 扫码仪 (CodeScanner)
 - 酷安话题区：[CoolApk](https://www.coolapk.com/feed/49061660?shareKey=ZTI2NDcxOTdmMjQ3NjYyYmQ3MjI~&shareUid=555267&shareFrom=com.coolapk.market_14.1.2 "初始发布帖")  
 + 自制Android端“扫码仪”，不仅提供了各类码的扫描识别功能，还提供了构建码功能。  
