@@ -53,6 +53,9 @@ class MainActivity : AppCompatActivity() {
     private var multiPicPrefix: String? = null
     private var multiCodePrefix: String? = null
     private var saveImageUri: Uri? = null
+    private var scanCnt = 1
+    private var parse = true
+    private var autoSaveResult = false
 
     // 定义Activity result launcher
     private val takePhotoLauncher =
@@ -60,6 +63,9 @@ class MainActivity : AppCompatActivity() {
             if (success) {
                 saveImageUri?.let {
                     scanPic(MediaStore.Images.Media.getBitmap(contentResolver, it))
+                    if (autoSaveResult) {
+                        saveData()
+                    }
                 }
             }
         }
@@ -72,10 +78,10 @@ class MainActivity : AppCompatActivity() {
                     scanPic(uri = it[i], multiPicIdx = i, multiPicAmt = it.size)
                 }
             }
+            if (autoSaveResult) {
+                saveData()
+            }
         }
-    private var scanCnt = 1
-    private var parse = true
-
 
     companion object {
         /**
@@ -122,6 +128,9 @@ class MainActivity : AppCompatActivity() {
         // 初始化 Toast 框架
         Toaster.init(this.application)
 
+        // 读取设置
+        readSettings()
+
         // Init str
         binding.tvOutput.text =
             SpannableStringBuilder().appendMySpan(WAIT_FOR_SCAN, "#7400FF", null)
@@ -134,7 +143,7 @@ class MainActivity : AppCompatActivity() {
 
         if (type != null) {
             if (!type.startsWith("image/")) {
-                showSnackbar(binding.fabScanCode, "导入了错误的文件类型", Snackbar.LENGTH_LONG)
+                showErrorToast("导入了错误的文件类型")
             } else if (action == Intent.ACTION_SEND) {
                 binding.tvOutput.text = SpannableStringBuilder().appendMySpan(
                     "$INVOKED_BY_INTENT_SEND\n", "#FF4400", 1.1
@@ -281,12 +290,17 @@ class MainActivity : AppCompatActivity() {
         multiCodePrefix = sharedPreferences.getString("multi_code_prefix", null)
         // 读取布尔值
         parse = sharedPreferences.getBoolean("parse", true)
+        autoSaveResult = sharedPreferences.getBoolean("auto_save_result", false)
+
     }
 
     private fun handleViewImage(intent: Intent) {
         val imgUri = intent.data
         imgUri?.let {
             scanPic(uri = it)
+            if (autoSaveResult) {
+                saveData()
+            }
         }
     }
 
@@ -294,6 +308,9 @@ class MainActivity : AppCompatActivity() {
         val imgUri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
         imgUri?.let {
             scanPic(uri = it)
+            if (autoSaveResult) {
+                saveData()
+            }
         }
     }
 
@@ -301,6 +318,9 @@ class MainActivity : AppCompatActivity() {
         val imgUris = intent.getParcelableArrayListExtra<Uri?>(Intent.EXTRA_STREAM)
         imgUris?.let {
             scanPics(it)
+            if (autoSaveResult) {
+                saveData()
+            }
         }
     }
 

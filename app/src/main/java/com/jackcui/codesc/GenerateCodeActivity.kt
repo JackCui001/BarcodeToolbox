@@ -10,10 +10,12 @@ import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.hjq.permissions.OnPermissionCallback
 import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
@@ -36,26 +38,200 @@ import java.util.Locale
 
 
 class GenerateCodeActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityGenerateCodeBinding
+    private lateinit var bd: ActivityGenerateCodeBinding
     private lateinit var codeTypeStrArr: Array<String>
     private var showCodeTypeInfo = true
     private var codePreviewIdx = 0
     private var codeBitmap: Bitmap? = null
     private var res = StringBuilder()
+    private var dlgContactBd: DialogContactBinding? = null
+    private var dlgPhoneBd: DialogPhoneBinding? = null
+    private var dlgSmsBd: DialogSmsBinding? = null
+    private var dlgEmailBd: DialogEmailBinding? = null
 
     private val convertInfoDismissCallback = DialogInterface.OnDismissListener {
         if (res.isNotBlank()) {
-            binding.tietGenContent.setText(res)
+            bd.tietGenContent.setText(res)
             showInfoToast("特殊信息转换完成")
             res.clear()
+        }
+    }
+
+    // 定义Activity result launcher
+    private val contactLau = registerForActivityResult(ActivityResultContracts.PickContact()) {
+        it?.let { uri ->
+            dlgContactBd?.run {
+                // 清空旧数据
+                tietContactName.setText("")
+                actvContactMobilePhone.setText("")
+                actvContactOfficePhone.setText("")
+                actvContactHomePhone.setText("")
+                (actvContactMobilePhone as MaterialAutoCompleteTextView).setSimpleItems(
+                    emptyArray()
+                )
+                (actvContactOfficePhone as MaterialAutoCompleteTextView).setSimpleItems(
+                    emptyArray()
+                )
+                (actvContactHomePhone as MaterialAutoCompleteTextView).setSimpleItems(
+                    emptyArray()
+                )
+                actvContactAddr.setText("")
+                (actvContactAddr as MaterialAutoCompleteTextView).setSimpleItems(
+                    emptyArray()
+                )
+                actvContactEmail.setText("")
+                (actvContactEmail as MaterialAutoCompleteTextView).setSimpleItems(
+                    emptyArray()
+                )
+                actvContactWebsite.setText("")
+                (actvContactWebsite as MaterialAutoCompleteTextView).setSimpleItems(
+                    emptyArray()
+                )
+                tietContactCompany.setText("")
+                tietContactJobTitle.setText("")
+
+                // 读取新数据并赋值
+                val contactUtils = ContactUtils()
+                val contactInfo = contactUtils.getContactInfo(this@GenerateCodeActivity, it)
+                contactInfo?.let {
+                    Log.d(TAG, it.toString())
+                    if (it.name.isNotBlank()) {
+                        tietContactName.setText(it.name)
+                    }
+                    if (it.company.isNotBlank()) {
+                        tietContactCompany.setText(it.company)
+                    }
+                    if (it.jobTitle.isNotBlank()) {
+                        tietContactJobTitle.setText(it.jobTitle)
+                    }
+                    val phoneNumberCnt = it.phoneNumbers.size
+                    if (phoneNumberCnt > 0) {
+                        tilContactHomePhone.helperText = "已导入 $phoneNumberCnt 个号码，请手动选择"
+                        val phoneNumArr = it.phoneNumbers.toTypedArray()
+                        actvContactMobilePhone.setSimpleItems(
+                            phoneNumArr
+                        )
+                        actvContactOfficePhone.setSimpleItems(
+                            phoneNumArr
+                        )
+                        actvContactHomePhone.setSimpleItems(
+                            phoneNumArr
+                        )
+                    } else {
+                        tilContactHomePhone.helperText = null
+                    }
+
+                    val emailCnt = it.emails.size
+                    if (emailCnt > 0) {
+                        tilContactEmail.helperText = "已导入 $emailCnt 个邮箱，请手动选择"
+                        actvContactEmail.setSimpleItems(
+                            it.emails.toTypedArray()
+                        )
+                    } else {
+                        tilContactEmail.helperText = null
+                    }
+
+                    val websiteCnt = it.websites.size
+                    if (websiteCnt > 0) {
+                        tilContactWebsite.helperText = "已导入 $emailCnt 个网站，请手动选择"
+                        actvContactWebsite.setSimpleItems(
+                            it.websites.toTypedArray()
+                        )
+                    } else {
+                        tilContactWebsite.helperText = null
+                    }
+
+                    val addressCnt = it.addresses.size
+                    if (addressCnt > 0) {
+                        tilContactAddr.helperText = "已导入 $addressCnt 个地址，请手动选择"
+                        actvContactAddr.setSimpleItems(
+                            it.addresses.toTypedArray()
+                        )
+                    } else {
+                        tilContactAddr.helperText = null
+                    }
+                }
+            }
+        }
+    }
+
+    private val phoneLau = registerForActivityResult(ActivityResultContracts.PickContact()) {
+        it?.let {
+            dlgPhoneBd?.run {
+                // 清空旧数据
+                actvPhoneNumber.setText("")
+                (actvPhoneNumber as MaterialAutoCompleteTextView).setSimpleItems(emptyArray())
+                // 读取新数据并赋值
+                val contactUtils = ContactUtils()
+                val contactInfo = contactUtils.getContactInfo(this@GenerateCodeActivity, it)
+                contactInfo?.let {
+                    val phoneNumberCnt = it.phoneNumbers.size
+                    if (phoneNumberCnt > 0) {
+                        tilPhoneNumber.helperText = "已导入 $phoneNumberCnt 个号码，请手动选择"
+                        actvPhoneNumber.setSimpleItems(
+                            it.phoneNumbers.toTypedArray()
+                        )
+                    } else {
+                        tilPhoneNumber.helperText = null
+                    }
+                }
+            }
+        }
+    }
+
+    private val smsLau = registerForActivityResult(ActivityResultContracts.PickContact()) {
+        it?.let {
+            dlgSmsBd?.run {
+                // 清空旧数据
+                actvSmsPhone.setText("")
+                (actvSmsPhone as MaterialAutoCompleteTextView).setSimpleItems(emptyArray())
+                // 读取新数据并赋值
+                val contactUtils = ContactUtils()
+                val contactInfo = contactUtils.getContactInfo(this@GenerateCodeActivity, it)
+                contactInfo?.let {
+                    val phoneNumberCnt = it.phoneNumbers.size
+                    if (phoneNumberCnt > 0) {
+                        tilSmsPhone.helperText = "已导入 $phoneNumberCnt 个号码，请手动选择"
+                        actvSmsPhone.setSimpleItems(
+                            it.phoneNumbers.toTypedArray()
+                        )
+                    } else {
+                        tilSmsPhone.helperText = null
+                    }
+                }
+            }
+        }
+    }
+
+    private val emailLau = registerForActivityResult(ActivityResultContracts.PickContact()) {
+        it?.let {
+            dlgEmailBd?.run {
+                // 清空旧数据
+                actvEmailAddr.setText("")
+                (actvEmailAddr as MaterialAutoCompleteTextView).setSimpleItems(emptyArray())
+                // 读取新数据并赋值
+                val contactUtils = ContactUtils()
+                val contactInfo = contactUtils.getContactInfo(this@GenerateCodeActivity, it)
+                contactInfo?.let {
+                    val emailCnt = it.emails.size
+                    if (emailCnt > 0) {
+                        tilEmailAddr.helperText = "已导入 $emailCnt 个邮箱地址，请手动选择"
+                        actvEmailAddr.setSimpleItems(
+                            it.emails.toTypedArray()
+                        )
+                    } else {
+                        tilEmailAddr.helperText = null
+                    }
+                }
+            }
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // ViewBinding
-        binding = ActivityGenerateCodeBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        bd = ActivityGenerateCodeBinding.inflate(layoutInflater)
+        setContentView(bd.root)
 
 //        supportActionBar?.title = "构建码"
 //        supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -80,29 +256,38 @@ class GenerateCodeActivity : AppCompatActivity() {
         val hints = resources.getStringArray(R.array.hints)
         var selectedItemIdx = -1
 
-        binding.tvLenInd.text = "剩余可用字节：N/A"
-        binding.tietGenContent.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+        bd.tvLenInd.text = "剩余可用字节：N/A"
+        bd.tietGenContent.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(
+                s: CharSequence, start: Int, count: Int, after: Int
+            ) {
+            }
+
+            override fun onTextChanged(
+                s: CharSequence, start: Int, before: Int, count: Int
+            ) {
+            }
+
             override fun afterTextChanged(s: Editable) {
                 if (selectedItemIdx == -1) {
                     return
                 }
-                binding.tvLenInd.text = "剩余可用字节：${
+                bd.tvLenInd.text = "剩余可用字节：${
                     maxBytes[selectedItemIdx] - s.toString().encodeToByteArray().size
                 }"
             }
         })
 
-        binding.actvCodeType.setOnItemClickListener { _, _, position, _ ->
+        bd.actvCodeType.setOnItemClickListener { _, _, position, _ ->
             selectedItemIdx = position
-            binding.tvLenInd.text = "剩余可用字节：${
-                maxBytes[selectedItemIdx] - binding.tietGenContent.text.toString()
+            bd.tvLenInd.text = "剩余可用字节：${
+                maxBytes[selectedItemIdx] - bd.tietGenContent.text.toString()
                     .encodeToByteArray().size
             }"
             if (showCodeTypeInfo) {
-                MaterialAlertDialogBuilder(this@GenerateCodeActivity).setTitle(codeTypeStrArr[selectedItemIdx])
-                    .setMessage(hints[selectedItemIdx])
+                MaterialAlertDialogBuilder(this@GenerateCodeActivity).setTitle(
+                    codeTypeStrArr[selectedItemIdx]
+                ).setMessage(hints[selectedItemIdx])
                     .setPositiveButton("确认") { dialog, _ -> dialog.dismiss() }.show()
             }
         }
@@ -111,7 +296,7 @@ class GenerateCodeActivity : AppCompatActivity() {
 //            (wifiInputDialogBinding.root.parent as ViewGroup).removeView(wifiInputDialogBinding.root)
 //        }
 
-        binding.btnSpInfoConvert.setOnClickListener {
+        bd.btnSpInfoConvert.setOnClickListener {
             val items = arrayOf("Wi-Fi", "E-mail", "电话号码", "短信", "联系人", "坐标")
 
             MaterialAlertDialogBuilder(this).setTitle("请选择一种信息类型")
@@ -127,18 +312,18 @@ class GenerateCodeActivity : AppCompatActivity() {
                 }.show()
         }
 
-        binding.btnGenCode.setOnClickListener {
-            val codeTypeText = binding.actvCodeType.text
+        bd.btnGenCode.setOnClickListener {
+            val codeTypeText = bd.actvCodeType.text
             if (codeTypeText.isNullOrEmpty()) {
                 showErrorToast("未选择码类型，无法生成浏览")
                 return@setOnClickListener
             }
-            val lenIndicatorText = binding.tvLenInd.text
+            val lenIndicatorText = bd.tvLenInd.text
             if (lenIndicatorText.substring(lenIndicatorText.indexOf("：") + 1).toInt() < 0) {
                 showErrorToast("超出字节数限制，无法生成预览")
                 return@setOnClickListener
             }
-            val content = binding.tietGenContent.text
+            val content = bd.tietGenContent.text
             if (content.isNullOrEmpty()) {
                 showErrorToast("文本内容为空，无法生成浏览")
                 return@setOnClickListener
@@ -148,7 +333,7 @@ class GenerateCodeActivity : AppCompatActivity() {
             val height = 400
             try {
                 codeBitmap = ScanUtil.buildBitmap(content.toString(), type, width, height, null)
-                binding.ivCodePreview.setImageBitmap(codeBitmap)
+                bd.ivCodePreview.setImageBitmap(codeBitmap)
                 showInfoToast("生成预览成功，长按图片以保存")
                 codePreviewIdx = selectedItemIdx
             } catch (e: Exception) {
@@ -157,7 +342,11 @@ class GenerateCodeActivity : AppCompatActivity() {
             }
         }
 
-        binding.ivCodePreview.setOnLongClickListener {
+        bd.ivCodePreview.setOnLongClickListener {
+            if (codeBitmap == null) {
+                showErrorToast("请先生成预览")
+                return@setOnLongClickListener true
+            }
             reqPermAndWrite2File()
             true
         }
@@ -166,7 +355,9 @@ class GenerateCodeActivity : AppCompatActivity() {
     private fun reqPermAndWrite2File() {
         XXPermissions.with(this).permission(Permission.WRITE_EXTERNAL_STORAGE)
             .request(object : OnPermissionCallback {
-                override fun onGranted(permissions: MutableList<String>, allGranted: Boolean) {
+                override fun onGranted(
+                    permissions: MutableList<String>, allGranted: Boolean
+                ) {
                     if (!allGranted) {
                         return
                     }
@@ -190,11 +381,6 @@ class GenerateCodeActivity : AppCompatActivity() {
     }
 
     private fun writeCodePicFile() {
-        if (codeBitmap == null) {
-            showErrorToast("请先生成预览")
-            return
-        }
-
         // Add a specific media item
         val resolver = applicationContext.contentResolver
 
@@ -252,7 +438,7 @@ class GenerateCodeActivity : AppCompatActivity() {
         }
 
         if (imageUri != null) {
-            showInfoToast("图片已保存到：$filePathAndName")
+            showInfoToast("图片已保存至：$filePathAndName")
         } else {
             showErrorToast("发生异常，图片保存失败")
         }
@@ -271,43 +457,43 @@ class GenerateCodeActivity : AppCompatActivity() {
     private fun showWifiDialog(wifiStr: StringBuilder) {
         val cipherArr = resources.getStringArray(R.array.cipher)
         var cipherText = ""
-        val wifiBinding = DialogWifiBinding.inflate(layoutInflater)
-        wifiBinding.actvWifiCipher.setOnItemClickListener { _, _, position, _ ->
+        val dlgWifiBd = DialogWifiBinding.inflate(layoutInflater)
+        dlgWifiBd.actvWifiCipher.setOnItemClickListener { _, _, position, _ ->
             cipherText = cipherArr[position]
             if (cipherText == "无") {
-                wifiBinding.tietWifiPwd.setText("")
-                wifiBinding.tilWifiPwd.helperText = "当前加密方式无需密码"
-                wifiBinding.tilWifiPwd.isEnabled = false
+                dlgWifiBd.tietWifiPwd.setText("")
+                dlgWifiBd.tilWifiPwd.helperText = "当前加密方式无需密码"
+                dlgWifiBd.tilWifiPwd.isEnabled = false
             } else {
-                wifiBinding.tilWifiPwd.helperText = null
-                wifiBinding.tilWifiPwd.isEnabled = true
+                dlgWifiBd.tilWifiPwd.helperText = null
+                dlgWifiBd.tilWifiPwd.isEnabled = true
             }
         }
         wifiStr.append("WIFI:")
-        val dialog = MaterialAlertDialogBuilder(this).setView(wifiBinding.root).setTitle("Wi-Fi")
+        val dialog = MaterialAlertDialogBuilder(this).setView(dlgWifiBd.root).setTitle("Wi-Fi")
             .setPositiveButton("确认", null).setOnCancelListener {
                 Log.d(TAG, "showWifiDialog: OnCancel")
                 wifiStr.clear()
             }.setOnDismissListener(convertInfoDismissCallback).show()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             var ok = true
-            if (wifiBinding.tietWifiSsid.text.isNullOrBlank()) {
-                wifiBinding.tilWifiSsid.error = "SSID不能为空"
+            if (dlgWifiBd.tietWifiSsid.text.isNullOrBlank()) {
+                dlgWifiBd.tilWifiSsid.error = "SSID不能为空"
                 ok = false
             } else {
-                wifiBinding.tilWifiSsid.error = null
+                dlgWifiBd.tilWifiSsid.error = null
             }
-            if (wifiBinding.tilWifiPwd.isEnabled && wifiBinding.tietWifiPwd.text.isNullOrBlank()) {
-                wifiBinding.tilWifiPwd.error = "密码不能为空"
+            if (dlgWifiBd.tilWifiPwd.isEnabled && dlgWifiBd.tietWifiPwd.text.isNullOrBlank()) {
+                dlgWifiBd.tilWifiPwd.error = "密码不能为空"
                 ok = false
             } else {
-                wifiBinding.tilWifiPwd.error = null
+                dlgWifiBd.tilWifiPwd.error = null
             }
-            if (wifiBinding.actvWifiCipher.text.isNullOrEmpty()) {
-                wifiBinding.tilWifiCipher.error = "加密方式不能为空"
+            if (dlgWifiBd.actvWifiCipher.text.isNullOrEmpty()) {
+                dlgWifiBd.tilWifiCipher.error = "加密方式不能为空"
                 ok = false
             } else {
-                wifiBinding.tilWifiCipher.error = null
+                dlgWifiBd.tilWifiCipher.error = null
             }
             if (!ok) {
                 return@setOnClickListener
@@ -325,224 +511,246 @@ class GenerateCodeActivity : AppCompatActivity() {
                     wifiStr.append("T:WEP;")
                 }
             }
-            wifiStr.append("S:${wifiBinding.tietWifiSsid.text};")
-            if (wifiBinding.tilWifiPwd.isEnabled) {
-                wifiStr.append("P:${wifiBinding.tietWifiPwd.text};")
+            wifiStr.append("S:${dlgWifiBd.tietWifiSsid.text};")
+            if (dlgWifiBd.tilWifiPwd.isEnabled) {
+                wifiStr.append("P:${dlgWifiBd.tietWifiPwd.text};")
             }
-            wifiStr.append("H:${wifiBinding.cbWifiHidden.isChecked};")
+            wifiStr.append("H:${dlgWifiBd.cbWifiHidden.isChecked};")
             wifiStr.append(";")
             dialog.dismiss()
         }
     }
 
     private fun showEmailDialog(emailStr: StringBuilder) {
-        val emailBinding = DialogEmailBinding.inflate(layoutInflater)
+        val dlgEmailBd = DialogEmailBinding.inflate(layoutInflater)
         emailStr.append("MATMSG:")
-        val dialog = MaterialAlertDialogBuilder(this).setView(emailBinding.root).setTitle("E-mail")
-            .setPositiveButton("确认", null).setOnCancelListener {
+        val dialog = MaterialAlertDialogBuilder(this).setView(dlgEmailBd.root).setTitle("E-mail")
+            .setPositiveButton("确认", null).setNeutralButton("从通讯录获取", null)
+            .setOnCancelListener {
                 Log.d(TAG, "showEmailDialog: OnCancel")
                 emailStr.clear()
             }.setOnDismissListener(convertInfoDismissCallback).show()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             var ok = true
-            if (emailBinding.tietEmailAddr.text.isNullOrBlank()) {
-                emailBinding.tilEmailAddr.error = "收件邮箱不能为空"
+            if (dlgEmailBd.actvEmailAddr.text.isNullOrBlank()) {
+                dlgEmailBd.tilEmailAddr.error = "收件邮箱不能为空"
                 ok = false
             } else {
-                emailBinding.tilEmailAddr.error = null
+                dlgEmailBd.tilEmailAddr.error = null
             }
-            if (emailBinding.tietEmailSubject.text.isNullOrBlank()) {
-                emailBinding.tilEmailSubject.error = "主题不能为空"
+            if (dlgEmailBd.tietEmailSubject.text.isNullOrBlank()) {
+                dlgEmailBd.tilEmailSubject.error = "主题不能为空"
                 ok = false
             } else {
-                emailBinding.tilEmailSubject.error = null
+                dlgEmailBd.tilEmailSubject.error = null
             }
-            if (emailBinding.tietEmailContent.text.isNullOrBlank()) {
-                emailBinding.tilEmailContent.error = "内容不能为空"
+            if (dlgEmailBd.tietEmailContent.text.isNullOrBlank()) {
+                dlgEmailBd.tilEmailContent.error = "内容不能为空"
                 ok = false
             } else {
-                emailBinding.tilEmailContent.error = null
+                dlgEmailBd.tilEmailContent.error = null
             }
             if (!ok) {
                 return@setOnClickListener
             }
-            emailStr.append("TO:${emailBinding.tietEmailAddr.text};SUB:${emailBinding.tietEmailSubject.text};BODY:${emailBinding.tietEmailContent.text};;")
+            emailStr.append("TO:${dlgEmailBd.actvEmailAddr.text};SUB:${dlgEmailBd.tietEmailSubject.text};BODY:${dlgEmailBd.tietEmailContent.text};;")
             dialog.dismiss()
+        }
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+            reqContactPermAndExecTask(3)
         }
     }
 
     private fun showPhoneDialog(phoneStr: StringBuilder) {
-        val phoneBinding = DialogPhoneBinding.inflate(layoutInflater)
+        dlgPhoneBd = DialogPhoneBinding.inflate(layoutInflater)
         phoneStr.append("TEL:")
         val dialog =
-            MaterialAlertDialogBuilder(this).setView(phoneBinding.root).setTitle("电话号码")
-                .setPositiveButton("确认", null).setOnCancelListener {
+            MaterialAlertDialogBuilder(this).setView(dlgPhoneBd!!.root).setTitle("电话号码")
+                .setPositiveButton("确认", null).setNeutralButton("从通讯录获取", null)
+                .setOnCancelListener {
                     Log.d(TAG, "showPhoneDialog: OnCancel")
                     phoneStr.clear()
                 }.setOnDismissListener(convertInfoDismissCallback).show()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            if (phoneBinding.tietPhoneNumber.text.isNullOrBlank()) {
-                phoneBinding.tilPhoneNumber.error = "电话号码不能为空"
-                return@setOnClickListener
+            dlgPhoneBd?.run {
+                if (actvPhoneNumber.text.isNullOrBlank()) {
+                    tilPhoneNumber.error = "电话号码不能为空"
+                    return@setOnClickListener
+                }
+                phoneStr.append("${actvPhoneNumber.text}")
+                dialog.dismiss()
             }
-            phoneStr.append("${phoneBinding.tietPhoneNumber.text}")
-            dialog.dismiss()
+        }
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+            reqContactPermAndExecTask(1)
         }
     }
 
     private fun showSmsDialog(smsStr: StringBuilder) {
-        val smsBinding = DialogSmsBinding.inflate(layoutInflater)
+        dlgSmsBd = DialogSmsBinding.inflate(layoutInflater)
         smsStr.append("SMSTO:")
-        val dialog = MaterialAlertDialogBuilder(this).setView(smsBinding.root).setTitle("短信")
-            .setPositiveButton("确认", null).setOnCancelListener {
+        val dialog = MaterialAlertDialogBuilder(this).setView(dlgSmsBd!!.root).setTitle("短信")
+            .setPositiveButton("确认", null).setNeutralButton("从通讯录获取", null)
+            .setOnCancelListener {
                 Log.d(TAG, "showSmsDialog: OnCancel")
                 smsStr.clear()
             }.setOnDismissListener(convertInfoDismissCallback).show()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            var ok = true
-            if (smsBinding.tietSmsPhone.text.isNullOrBlank()) {
-                smsBinding.tilSmsPhone.error = "收件邮箱不能为空"
-                ok = false
-            } else {
-                smsBinding.tilSmsPhone.error = null
+            dlgSmsBd?.run {
+                var ok = true
+                if (actvSmsPhone.text.isNullOrBlank()) {
+                    tilSmsPhone.error = "收件邮箱不能为空"
+                    ok = false
+                } else {
+                    tilSmsPhone.error = null
+                }
+                if (tietSmsContent.text.isNullOrBlank()) {
+                    tilSmsContent.error = "内容不能为空"
+                    ok = false
+                } else {
+                    tilSmsContent.error = null
+                }
+                if (!ok) {
+                    return@setOnClickListener
+                }
+                smsStr.append("${actvSmsPhone.text}:${tietSmsContent.text}")
+                dialog.dismiss()
             }
-            if (smsBinding.tietSmsContent.text.isNullOrBlank()) {
-                smsBinding.tilSmsContent.error = "内容不能为空"
-                ok = false
-            } else {
-                smsBinding.tilSmsContent.error = null
-            }
-            if (!ok) {
-                return@setOnClickListener
-            }
-            smsStr.append("${smsBinding.tietSmsPhone.text}:${smsBinding.tietSmsContent.text}")
-            dialog.dismiss()
+        }
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+            reqContactPermAndExecTask(2)
         }
     }
 
     private fun showContactDialog(contactStr: StringBuilder) {
-        val contactBinding = DialogContactBinding.inflate(layoutInflater)
-        contactStr.append("BEGIN:VCARD\nVERSION:3.0\n")
+        dlgContactBd = DialogContactBinding.inflate(layoutInflater)
+        contactStr.appendLine("BEGIN:VCARD\nVERSION:3.0")
         val dialog =
-            MaterialAlertDialogBuilder(this).setView(contactBinding.root).setTitle("联系人")
-                .setPositiveButton("确认", null).setOnCancelListener {
+            MaterialAlertDialogBuilder(this).setView(dlgContactBd!!.root).setTitle("联系人")
+                .setPositiveButton("确认", null).setNeutralButton("从通讯录获取", null)
+                .setOnCancelListener {
                     Log.d(TAG, "showContactDialog: OnCancel")
                     contactStr.clear()
                 }.setOnDismissListener(convertInfoDismissCallback).show()
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+            reqContactPermAndExecTask(0)
+        }
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            val lastName = contactBinding.tietContactLastName.text
-            val firstName = contactBinding.tietContactFirstName.text
-            val org = contactBinding.tietContactOrg.text
-            val jobTitle = contactBinding.tietContactJobTitle.text
-            val street = contactBinding.tietContactStreet.text
-            val city = contactBinding.tietContactCity.text
-            val region = contactBinding.tietContactRegion.text
-            val postcode = contactBinding.tietContactPostcode.text
-            val country = contactBinding.tietContactCountry.text
-            val officePhone = contactBinding.tietContactOfficePhone.text
-            val mobilePhone = contactBinding.tietContactMobilePhone.text
-            val fax = contactBinding.tietContactFax.text
-            val email = contactBinding.tietContactEmail.text
-            val url = contactBinding.tietContactWebsite.text
-            if (lastName.isNullOrBlank() && firstName.isNullOrBlank() && org.isNullOrBlank() && jobTitle.isNullOrBlank() && street.isNullOrBlank() && city.isNullOrBlank() && region.isNullOrBlank() && postcode.isNullOrBlank() && country.isNullOrBlank() && officePhone.isNullOrBlank() && mobilePhone.isNullOrBlank() && fax.isNullOrBlank() && email.isNullOrBlank() && url.isNullOrBlank()) {
-                dialog.cancel()
-                showErrorToast("至少需要输入一项信息")
-            }
-            if (!lastName.isNullOrBlank() || !firstName.isNullOrBlank()) {
-                contactStr.append("N:")
-                if (!lastName.isNullOrBlank() && !firstName.isNullOrBlank()) {
-                    contactStr.append("$lastName;$firstName\n")
-                } else if (!lastName.isNullOrBlank()) {
-                    contactStr.append("$lastName;\n")
-                } else {
-                    contactStr.append(";$firstName\n")
+            dlgContactBd?.run {
+                val name = tietContactName.text
+                val mobilePhone = actvContactMobilePhone.text
+                val officePhone = actvContactOfficePhone.text
+                val homePhone = actvContactHomePhone.text
+                val addr = actvContactAddr.text
+                val email = actvContactEmail.text
+                val url = actvContactWebsite.text
+                val company = tietContactCompany.text
+                val jobTitle = tietContactJobTitle.text
+                if (name.isNullOrBlank() && officePhone.isNullOrBlank() && mobilePhone.isNullOrBlank() && homePhone.isNullOrBlank() && addr.isNullOrBlank() && email.isNullOrBlank() && company.isNullOrBlank() && jobTitle.isNullOrBlank() && url.isNullOrBlank()) {
+                    dialog.cancel()
+                    showErrorToast("至少需要输入一项信息")
                 }
-            }
-            if (!firstName.isNullOrBlank() || !lastName.isNullOrBlank()) {
-                contactStr.append("FN:")
-                if (!firstName.isNullOrBlank()) {
-                    contactStr.append("$firstName")
+                if (!name.isNullOrBlank()) {
+                    contactStr.appendLine("N:;$name")
+                    contactStr.appendLine("FN:$name")
                 }
-                if (!lastName.isNullOrBlank()) {
-                    contactStr.append(" $lastName")
+                if (!company.isNullOrBlank()) {
+                    contactStr.appendLine("ORG:$company")
                 }
-                contactStr.append('\n')
+                if (!jobTitle.isNullOrBlank()) {
+                    contactStr.appendLine("TITLE:$jobTitle")
+                }
+                if (!addr.isNullOrBlank()) {
+                    contactStr.appendLine("ADR:;;$addr;;;;")
+                }
+                if (!mobilePhone.isNullOrBlank()) {
+                    contactStr.appendLine("TEL;CELL:$mobilePhone")
+                }
+                if (!officePhone.isNullOrBlank()) {
+                    contactStr.appendLine("TEL;WORK:$officePhone")
+                }
+                if (!homePhone.isNullOrBlank()) {
+                    contactStr.appendLine("TEL;HOME:$homePhone")
+                }
+                if (!email.isNullOrBlank()) {
+                    contactStr.appendLine("EMAIL:$email")
+                }
+                if (!url.isNullOrBlank()) {
+                    contactStr.appendLine("URL:$url")
+                }
+                contactStr.appendLine("END:VCARD")
+                dialog.dismiss()
             }
-            if (!org.isNullOrBlank()) {
-                contactStr.append("ORG:$org\n")
-            }
-            if (!jobTitle.isNullOrBlank()) {
-                contactStr.append("TITLE:$jobTitle\n")
-            }
-            if (!street.isNullOrBlank() || !city.isNullOrBlank() || !region.isNullOrBlank() || !postcode.isNullOrBlank() || !country.isNullOrBlank()) {
-                contactStr.append("ADR:;")
-                contactStr.append(if (!street.isNullOrBlank()) ";$street" else ";")
-                contactStr.append(if (!city.isNullOrBlank()) ";$city" else ";")
-                contactStr.append(if (!region.isNullOrBlank()) ";$region" else ";")
-                contactStr.append(if (!postcode.isNullOrBlank()) ";$postcode" else ";")
-                contactStr.append(if (!country.isNullOrBlank()) ";$country" else ";")
-                contactStr.append("\n")
-            }
-            if (!officePhone.isNullOrBlank()) {
-                contactStr.append("TEL;WORK;VOICE:$officePhone\n")
-            }
-            if (!mobilePhone.isNullOrBlank()) {
-                contactStr.append("TEL;CELL:$mobilePhone\n")
-            }
-            if (!fax.isNullOrBlank()) {
-                contactStr.append("TEL;FAX:$fax\n")
-            }
-            if (!email.isNullOrBlank()) {
-                contactStr.append("EMAIL;WORK;INTERNET:$email\n")
-            }
-            if (!url.isNullOrBlank()) {
-                contactStr.append("URL:$url\n")
-            }
-            contactStr.append("END:VCARD")
-            dialog.dismiss()
         }
     }
 
     private fun showCoordDialog(coordStr: StringBuilder) {
-        val coordBinding = DialogCoordBinding.inflate(layoutInflater)
+        val dlgCoordBd = DialogCoordBinding.inflate(layoutInflater)
         coordStr.append("GEO:")
-        val dialog = MaterialAlertDialogBuilder(this).setView(coordBinding.root).setTitle("坐标")
+        val dialog = MaterialAlertDialogBuilder(this).setView(dlgCoordBd.root).setTitle("坐标")
             .setPositiveButton("确认", null).setOnCancelListener {
                 Log.d(TAG, "showCoordDialog: OnCancel")
                 coordStr.clear()
             }.setOnDismissListener(convertInfoDismissCallback).show()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             var ok = true
-            if (coordBinding.tietCoordLongitude.text.isNullOrBlank()) {
-                coordBinding.tilCoordLongitude.error = "经度不能为空"
+            if (dlgCoordBd.tietCoordLongitude.text.isNullOrBlank()) {
+                dlgCoordBd.tilCoordLongitude.error = "经度不能为空"
                 ok = false
             } else {
-                coordBinding.tilCoordLongitude.error = null
+                dlgCoordBd.tilCoordLongitude.error = null
             }
-            if (coordBinding.tietCoordLatitude.text.isNullOrBlank()) {
-                coordBinding.tilCoordLatitude.error = "纬度不能为空"
+            if (dlgCoordBd.tietCoordLatitude.text.isNullOrBlank()) {
+                dlgCoordBd.tilCoordLatitude.error = "纬度不能为空"
                 ok = false
             } else {
-                coordBinding.tilCoordLatitude.error = null
+                dlgCoordBd.tilCoordLatitude.error = null
             }
             if (!ok) {
                 return@setOnClickListener
             }
-            coordStr.append("${coordBinding.tietCoordLatitude.text},${coordBinding.tietCoordLongitude.text}")
+            coordStr.append("${dlgCoordBd.tietCoordLatitude.text},${dlgCoordBd.tietCoordLongitude.text}")
             dialog.dismiss()
         }
     }
 
-//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        super.onOptionsItemSelected(item)
-//        when (item.itemId) {
-//            android.R.id.home -> {
-//                finish()
-//                return true
-//            }
-//        }
-//        return false
-//    }
+    /**
+     * 请求联系人权限并且执行相应任务
+     * @param type
+     * 0 - 用于联系人界面
+     * 1 - 用于电话号码界面
+     * 2 - 用于短信界面
+     * 3 - 用于邮件界面
+     */
+    private fun reqContactPermAndExecTask(type: Int) {
+        XXPermissions.with(this).permission(Permission.READ_CONTACTS)
+            .request(object : OnPermissionCallback {
+                override fun onGranted(
+                    permissions: MutableList<String>, allGranted: Boolean
+                ) {
+                    when (type) {
+                        0 -> contactLau.launch(null)
+                        1 -> phoneLau.launch(null)
+                        2 -> smsLau.launch(null)
+                        3 -> emailLau.launch(null)
+                    }
+                }
+
+                override fun onDenied(
+                    permissions: MutableList<String>, doNotAskAgain: Boolean
+                ) {
+                    if (doNotAskAgain) {
+                        showErrorToast("权限请求被永久拒绝，请在系统设置中手动授权\n本应用仅申请必要权限，请放心授权")
+                        // 如果是被永久拒绝就跳转到应用权限系统设置页面
+                        XXPermissions.startPermissionActivity(
+                            this@GenerateCodeActivity, permissions
+                        )
+                    } else {
+                        showErrorToast("权限请求被拒绝，请允许授予权限以正常使用此应用\n本应用仅申请必要权限，请放心授权")
+                    }
+                }
+            })
+    }
 
     override fun onResume() {
         super.onResume()

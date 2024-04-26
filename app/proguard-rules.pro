@@ -46,3 +46,6 @@
 # hjq's modules
 -keep class com.hjq.permissions.** {*;}
 -keep class com.hjq.toast.** {*;}
+
+# FastJson2
+-keep class com.alibaba.fastjson2.** {*;}

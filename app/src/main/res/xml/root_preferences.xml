@@ -7,6 +7,12 @@
             app:summaryOff="输出原始字符串"
             app:summaryOn="输出解析后的数据"
             app:title="码值解析" />
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="auto_save_result"
+            app:summaryOff="将不会自动保存扫码结果至历史记录"
+            app:summaryOn="将会自动保存扫码结果至历史记录"
+            app:title="自动保存扫码结果" />
         <EditTextPreference
             app:key="multi_scan_prefix"
             app:title="自定义扫描前缀"
