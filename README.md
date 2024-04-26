@@ -9,6 +9,6 @@
 
 ### 更新日记：  
 - V1.2 (2404261)：增加 Coordinator Layout，使主结果界面滑动过渡更顺畅；删除冗余代码。  
-- V1.2 (2404251)：重构 UI，使用 Material Design 3 (Material You) 作为主题；新增“历史记录”相关功能；修复了一些Bug。  
-- V1.1 (2)：新增“构建码” (Beta) 功能，完善 UI 设计。  
+- V1.2 (2404251)：重构 UI，使用 Material Design 3 (Material You) 作为主题；新增 “历史记录” 相关功能；修复了一些 Bug 。  
+- V1.1 (2)：新增 “构建码” (Beta) 功能，完善 UI 设计。  
 - V1.0 (1)：初始发布。
