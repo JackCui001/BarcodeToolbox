@@ -20,6 +20,9 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# Enable config output
+#-printconfiguration full-r8-config.txt
+
 # Disable debug logcat in release version
 -assumenosideeffects class android.util.Log {
      public static *** *(...);
@@ -36,9 +39,9 @@
 -keepattributes InnerClasses
 -keepattributes Signature
 -keepattributes SourceFile,LineNumberTable
--keep class com.huawei.hianalytics.**{*;}
--keep class com.huawei.updatesdk.**{*;}
--keep class com.huawei.hms.**{*;}
+-keep class com.huawei.hianalytics.** {*;}
+-keep class com.huawei.updatesdk.** {*;}
+-keep class com.huawei.hms.** {*;}
 
 # hjq's modules
 -keep class com.hjq.permissions.** {*;}

@@ -11,7 +11,7 @@ android {
         applicationId "com.jackcui.codesc"
         minSdk 19
         targetSdk 34
-        versionCode 2404261
+        versionCode 2404271
         versionName "1.2"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
