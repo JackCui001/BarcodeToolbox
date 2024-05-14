@@ -4,15 +4,15 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.jackcui.codesc",
+  "applicationId": "com.jackcui.barcodetoolbox",
   "variantName": "release",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 2404271,
-      "versionName": "1.2",
+      "versionCode": 2405141,
+      "versionName": "1.3",
       "outputFile": "app-release.apk"
     }
   ],

@@ -1,10 +1,10 @@
-package com.jackcui.codesc
+package com.jackcui.barcodetoolbox
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.EditTextPreference
 import androidx.preference.PreferenceFragmentCompat
-import com.jackcui.codesc.MainActivity.Companion.showErrorToast
+import com.jackcui.barcodetoolbox.MainActivity.Companion.showErrorToast
 
 class SettingsActivity : AppCompatActivity() {
 

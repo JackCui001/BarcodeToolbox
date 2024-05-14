@@ -17,7 +17,6 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:hint="收件邮箱"
-            app:errorEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -37,7 +36,6 @@
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:hint="主题"
-            app:errorEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/til_email_addr">
@@ -57,7 +55,6 @@
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:hint="内容"
-            app:errorEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/til_email_subject">

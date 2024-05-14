@@ -1,6 +1,5 @@
 <resources>
-
-    <style name="Theme.codeSc" parent="Theme.Material3.Light.NoActionBar">
+    <style name="Theme.barcodeToolbox" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorEfab">#388E3C</item>
         <item name="colorOnEfab">#ffffff</item>
         <item name="colorEfabContainer">#94f990</item>
@@ -10,5 +9,4 @@
         <item name="alertDialogTheme">@style/ThemeOverlay.Material3.MaterialAlertDialog</item>
         <item name="dialogCornerRadius">28dp</item>
     </style>
-
 </resources>

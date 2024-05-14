@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace 'com.jackcui.codesc'
+    namespace 'com.jackcui.barcodetoolbox'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.jackcui.codesc"
+        applicationId "com.jackcui.barcodetoolbox"
         minSdk 19
         targetSdk 34
-        versionCode 2404271
-        versionName "1.2"
+        versionCode 2405141
+        versionName "1.3"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

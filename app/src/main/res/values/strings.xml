@@ -1,4 +1,6 @@
 <resources>
-    <string name="app_name">扫码仪</string>
+    <string name="app_name">条码工具箱</string>
     <string name="title_activity_settings">设置</string>
+    <string name="introduction">欢迎使用 “条码工具箱” 应用！\n本应用不仅提供了各类码的扫描识别功能，还提供了构建功能。\n支持外部应用导入图片扫描，在外部应用选择打开或分享图片并选择此应用即可。\n扫描码内容的同时可以解析提取各类有效信息，而不必纠结于原始字符串的含义。\n构建功能仍处于 Beta 阶段，有问题可以随时和开发者反馈。\n下列功能支持一图多码扫描：\n图片文件扫描，拍照扫描\n\n开发者：酷安@威尼斯的向日葵
+    </string>
 </resources>

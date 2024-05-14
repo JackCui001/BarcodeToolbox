@@ -1,24 +1,24 @@
-package com.jackcui.codesc
+package com.jackcui.barcodetoolbox
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.alibaba.fastjson2.JSON
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.jackcui.codesc.MainActivity.Companion.showErrorToast
-import com.jackcui.codesc.MainActivity.Companion.showInfoToast
-import com.jackcui.codesc.databinding.ActivityHistoryBinding
+import com.jackcui.barcodetoolbox.MainActivity.Companion.showErrorToast
+import com.jackcui.barcodetoolbox.MainActivity.Companion.showInfoToast
+import com.jackcui.barcodetoolbox.databinding.ActivityHistoryBinding
 import java.io.File
 
 
 class HistoryActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityHistoryBinding
+    private lateinit var bd: ActivityHistoryBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivityHistoryBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        bd = ActivityHistoryBinding.inflate(layoutInflater)
+        setContentView(bd.root)
 
         // 获取意图对象
         val itt = intent
@@ -28,9 +28,9 @@ class HistoryActivity : AppCompatActivity() {
         val key = itt.getStringExtra("key")!!
         val listIndex = itt.getIntExtra("list_index", -1)
         // 设置值
-        binding.tvOutput.text = history[key]!![listIndex]
+        bd.tvOutput.text = history[key]!![listIndex]
 
-        binding.btnRemoveRecord.setOnClickListener {
+        bd.btnRemoveRecord.setOnClickListener {
             MaterialAlertDialogBuilder(this).setTitle("删除记录")
                 .setMessage("日期：$key\n索引：${listIndex}\n确认要删除吗？此操作不可撤销！")
                 .setPositiveButton(

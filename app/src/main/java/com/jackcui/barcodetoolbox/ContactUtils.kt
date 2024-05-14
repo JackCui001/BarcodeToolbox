@@ -1,11 +1,13 @@
-package com.jackcui.codesc
+package com.jackcui.barcodetoolbox
 
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.provider.ContactsContract
+import com.hjq.permissions.Permission
+import com.hjq.permissions.XXPermissions
 
-class ContactUtils {
+class ContactUtils(context: Context) {
     data class ContactInfo(
         var name: String = "",
         var phoneNumbers: MutableSet<String> = mutableSetOf(),
@@ -16,8 +18,23 @@ class ContactUtils {
         var jobTitle: String = ""
     )
 
-    fun getContactInfo(context: Context, contactUri: Uri): ContactInfo? {
-        val contentResolver = context.contentResolver
+    companion object {
+        const val TAG = "ContactUtils"
+        val PERMISSION = arrayOf(Permission.READ_CONTACTS)
+    }
+
+    private val mContext = context
+
+    /**
+     * 遍历Uri指定的联系人信息
+     */
+    fun getContactInfo(contactUri: Uri): ContactInfo? {
+        val bGranted = XXPermissions.isGranted(mContext, PERMISSION)
+        if (!bGranted) {
+            return null
+        }
+        var contactInfo: ContactInfo? = null
+        val contentResolver = mContext.contentResolver
         val cursor = contentResolver.query(contactUri, null, null, null, null)
 
         cursor?.use {
@@ -25,10 +42,10 @@ class ContactUtils {
                 // 获取联系人的唯一ID
                 val id = it.getString(it.getColumnIndexOrThrow(ContactsContract.Contacts._ID))
                 // 使用唯一ID查询联系人的所有信息
-                return queryContactInfo(contentResolver, id)
+                contactInfo = queryContactInfo(contentResolver, id)
             }
         }
-        return null
+        return contactInfo
     }
 
     private fun queryContactInfo(contentResolver: ContentResolver, contactId: String): ContactInfo {

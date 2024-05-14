@@ -9,9 +9,9 @@
         <item>ITF14</item>
         <item>EAN-8</item>
         <item>EAN-13</item>
-        <item>Code 39</item>
-        <item>Code 93</item>
-        <item>Code 128</item>
+        <item>Code39</item>
+        <item>Code93</item>
+        <item>Code128</item>
         <item>Codabar</item>
     </string-array>
     <string-array name="cipher">
