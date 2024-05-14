@@ -24,5 +24,5 @@ dependencyResolutionManagement {
         maven { url 'https://developer.huawei.com/repo/' }
     }
 }
-rootProject.name = "CodeScanner"
+rootProject.name = "Barcode Toolbox"
 include ':app'
