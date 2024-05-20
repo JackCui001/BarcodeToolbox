@@ -19,7 +19,7 @@
             android:minHeight="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|enterAlwaysCollapsed"
             app:menu="@menu/top_app_bar"
-            app:title="扫码仪"
+            app:title="@string/app_name"
             app:titleCentered="true" />
     </com.google.android.material.appbar.AppBarLayout>
 

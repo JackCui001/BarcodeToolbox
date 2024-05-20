@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.provider.ContactsContract
+import androidx.core.database.getStringOrNull
 import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
 
@@ -91,16 +92,16 @@ class ContactUtils(context: Context) {
                     }
 
                     ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE -> {
-                        contactInfo.company = it.getString(
+                        contactInfo.company = it.getStringOrNull(
                             it.getColumnIndexOrThrow(
                                 ContactsContract.CommonDataKinds.Organization.COMPANY
                             )
-                        )
-                        contactInfo.jobTitle = it.getString(
+                        ) ?: ""
+                        contactInfo.jobTitle = it.getStringOrNull(
                             it.getColumnIndexOrThrow(
                                 ContactsContract.CommonDataKinds.Organization.TITLE
                             )
-                        )
+                        ) ?: ""
                     }
 
                     ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE -> {

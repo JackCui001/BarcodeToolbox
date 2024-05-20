@@ -734,8 +734,7 @@ class MainActivity : AppCompatActivity() {
                 bd.extendedFabAction.setIconResource(R.drawable.outline_person_add_alt_24)
                 bd.extendedFabAction.setOnClickListener {
                     val itt = Intent(
-                        Insert.ACTION,
-                        ContactsContract.Contacts.CONTENT_URI
+                        Insert.ACTION, ContactsContract.Contacts.CONTENT_URI
                     )
                     // 姓名信息
                     peopleName?.run {
