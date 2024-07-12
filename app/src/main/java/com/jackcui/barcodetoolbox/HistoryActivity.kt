@@ -30,7 +30,18 @@ class HistoryActivity : AppCompatActivity() {
         // 设置值
         bd.tvOutput.text = history[key]!![listIndex]
 
-        bd.btnRemoveRecord.setOnClickListener {
+        bd.efabRemoveRecord.shrink()
+
+        bd.efabRemoveRecord.setOnLongClickListener {
+            if (bd.efabRemoveRecord.isExtended) {
+                bd.efabRemoveRecord.shrink()
+            } else {
+                bd.efabRemoveRecord.extend()
+            }
+            true
+        }
+
+        bd.efabRemoveRecord.setOnClickListener {
             MaterialAlertDialogBuilder(this).setTitle("删除记录")
                 .setMessage("日期：$key\n索引：${listIndex}\n确认要删除吗？此操作不可撤销！")
                 .setPositiveButton(

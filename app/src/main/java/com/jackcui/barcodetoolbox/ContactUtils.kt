@@ -5,8 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.ContactsContract
 import androidx.core.database.getStringOrNull
-import com.hjq.permissions.Permission
-import com.hjq.permissions.XXPermissions
+import com.permissionx.guolindev.PermissionX
 
 class ContactUtils(context: Context) {
     data class ContactInfo(
@@ -21,7 +20,7 @@ class ContactUtils(context: Context) {
 
     companion object {
         const val TAG = "ContactUtils"
-        val PERMISSION = arrayOf(Permission.READ_CONTACTS)
+        const val PERMISSION = android.Manifest.permission.READ_CONTACTS
     }
 
     private val mContext = context
@@ -30,7 +29,7 @@ class ContactUtils(context: Context) {
      * 遍历Uri指定的联系人信息
      */
     fun getContactInfo(contactUri: Uri): ContactInfo? {
-        val bGranted = XXPermissions.isGranted(mContext, PERMISSION)
+        val bGranted = PermissionX.isGranted(mContext, PERMISSION)
         if (!bGranted) {
             return null
         }

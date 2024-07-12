@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.provider.ContactsContract.CommonDataKinds.Email
@@ -30,9 +31,6 @@ import com.alibaba.fastjson2.TypeReference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
-import com.hjq.permissions.OnPermissionCallback
-import com.hjq.permissions.Permission
-import com.hjq.permissions.XXPermissions
 import com.hjq.toast.ToastParams
 import com.hjq.toast.Toaster
 import com.hjq.toast.style.CustomToastStyle
@@ -48,6 +46,8 @@ import com.huawei.hms.ml.scan.HmsScanFrameOptions
 import com.jackcui.barcodetoolbox.WifiUtils.Companion.ssid
 import com.jackcui.barcodetoolbox.databinding.ActivityMainBinding
 import com.jackcui.barcodetoolbox.databinding.DialogHistoryPickerBinding
+import com.permissionx.guolindev.PermissionX
+import com.permissionx.guolindev.request.ForwardScope
 import java.io.File
 import java.io.Serializable
 import java.text.SimpleDateFormat
@@ -475,38 +475,59 @@ class MainActivity : AppCompatActivity() {
      * Apply for permissions.
      */
     private fun reqPermAndScan(hwScan: Boolean) {
-        XXPermissions.with(this).permission(Permission.CAMERA, Permission.READ_MEDIA_IMAGES)
-            .request(object : OnPermissionCallback {
-                override fun onGranted(permissions: MutableList<String>, allGranted: Boolean) {
-                    if (!allGranted) {
-                        return
-                    }
-                    if (hwScan) {
-                        val opt =
-                            HmsScanAnalyzerOptions.Creator().setHmsScanTypes(HmsScan.ALL_SCAN_TYPE)
-                                .setParseResult(bParse).create()
-                        ScanUtil.startScan(this@MainActivity, HW_SCAN_REQ_CODE, opt)
-                    } else {
-                        val file =
-                            File.createTempFile("tmp", ".jpg", this@MainActivity.externalCacheDir)
-                        val uri = FileProvider.getUriForFile(
-                            this@MainActivity, "com.jackcui.barcodetoolbox.fileprovider", file
-                        )
-                        saveImageUri = uri
-                        takePhotoLauncher.launch(uri)
-                    }
+        val permissions = mutableListOf<String>()
+        permissions.add(android.Manifest.permission.CAMERA)
+        permissions.add(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                android.Manifest.permission.READ_MEDIA_IMAGES
+            } else {
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }
+        )
+        PermissionX.init(this)
+            .permissions(permissions)
+            .explainReasonBeforeRequest()
+            .onExplainRequestReason { scope, deniedList ->
+                scope.showRequestReasonDialog(
+                    deniedList,
+                    "扫码必须使用以下权限",
+                    "好的",
+                    "取消"
+                )
+            }
+            .onForwardToSettings { scope: ForwardScope, deniedList: MutableList<String> ->
+                scope.showForwardToSettingsDialog(
+                    deniedList,
+                    "授权请求被永久拒绝\n您需要去应用程序设置中手动开启权限",
+                    "跳转到设置",
+                    "取消"
+                )
+            }
+            .request { allGranted, grantedList, deniedList ->
+                if (!allGranted) {
+                    showErrorToast("授权请求被拒绝")
+                    return@request
                 }
-
-                override fun onDenied(permissions: MutableList<String>, doNotAskAgain: Boolean) {
-                    if (doNotAskAgain) {
-                        showErrorToast("权限请求被永久拒绝，请在系统设置中手动授权\n本应用仅申请必要权限，请放心授权")
-                        // 如果是被永久拒绝就跳转到应用权限系统设置页面
-                        XXPermissions.startPermissionActivity(this@MainActivity, permissions)
-                    } else {
-                        showErrorToast("权限请求被拒绝，请允许授予权限以正常使用此应用\n本应用仅申请必要权限，请放心授权")
+                if (hwScan) {
+                    val opt =
+                        HmsScanAnalyzerOptions.Creator().setHmsScanTypes(HmsScan.ALL_SCAN_TYPE)
+                            .setParseResult(bParse).create()
+                    ScanUtil.startScan(this@MainActivity, HW_SCAN_REQ_CODE, opt)
+                } else {
+                    val file = File("${externalCacheDir}${File.separator}tmp_take_photo.png")
+                    if (file.exists()) {
+                        file.delete()
                     }
+                    file.createNewFile()
+                    file.deleteOnExit()
+                    val uri = FileProvider.getUriForFile(
+                        this@MainActivity, "com.jackcui.barcodetoolbox.fileprovider", file
+                    )
+                    file.deleteOnExit()
+                    saveImageUri = uri
+                    takePhotoLauncher.launch(uri)
                 }
-            })
+            }
     }
 
     /**
@@ -733,9 +754,7 @@ class MainActivity : AppCompatActivity() {
                 bd.extendedFabAction.text = "新建联系人"
                 bd.extendedFabAction.setIconResource(R.drawable.outline_person_add_alt_24)
                 bd.extendedFabAction.setOnClickListener {
-                    val itt = Intent(
-                        Insert.ACTION, ContactsContract.Contacts.CONTENT_URI
-                    )
+                    val itt = Intent(Insert.ACTION, ContactsContract.Contacts.CONTENT_URI)
                     // 姓名信息
                     peopleName?.run {
                         itt.putExtra(Insert.NAME, getFullName())
@@ -750,7 +769,6 @@ class MainActivity : AppCompatActivity() {
                     }
                     // 电话信息 + 邮箱信息 + 地址信息
                     itt.putParcelableArrayListExtra(Insert.DATA, data)
-                    Insert.NOTES
                     // 备注信息
                     if (!note.isNullOrEmpty()) {
                         itt.putExtra(Insert.NOTES, note)
@@ -1075,28 +1093,32 @@ class MainActivity : AppCompatActivity() {
                 bd.extendedFabAction.setIconResource(R.drawable.baseline_wifi_find_24)
                 bd.extendedFabAction.setOnClickListener {
                     val wifiUtils = WifiUtils(this)
-                    XXPermissions.with(this).permission(WifiUtils.PERMISSION)
-                        .request(object : OnPermissionCallback {
-                            override fun onGranted(
-                                permissions: MutableList<String>, allGranted: Boolean
-                            ) {
-                                wifiUtils.connectWifi(ssid, pwd)
+                    PermissionX.init(this)
+                        .permissions(WifiUtils.PERMISSION)
+                        .explainReasonBeforeRequest()
+                        .onExplainRequestReason { scope, deniedList ->
+                            scope.showRequestReasonDialog(
+                                deniedList,
+                                "连接热点必须使用以下权限",
+                                "好的",
+                                "取消"
+                            )
+                        }
+                        .onForwardToSettings { scope: ForwardScope, deniedList: MutableList<String> ->
+                            scope.showForwardToSettingsDialog(
+                                deniedList,
+                                "授权请求被永久拒绝\n您需要去应用程序设置中手动开启权限",
+                                "跳转到设置",
+                                "取消"
+                            )
+                        }
+                        .request { allGranted, grantedList, deniedList ->
+                            if (!allGranted) {
+                                showErrorToast("授权请求被拒绝")
+                                return@request
                             }
-
-                            override fun onDenied(
-                                permissions: MutableList<String>, doNotAskAgain: Boolean
-                            ) {
-                                if (doNotAskAgain) {
-                                    showErrorToast("权限请求被永久拒绝，请在系统设置中手动授权\n本应用仅申请必要权限，请放心授权")
-                                    // 如果是被永久拒绝就跳转到应用权限系统设置页面
-                                    XXPermissions.startPermissionActivity(
-                                        this@MainActivity, permissions
-                                    )
-                                } else {
-                                    showErrorToast("位置权限请求被拒绝，此功能必须使用此权限\n本应用仅申请必要权限，请放心授权")
-                                }
-                            }
-                        })
+                            wifiUtils.connectWifi(ssid, pwd)
+                        }
                 }
                 bd.extendedFabAction.show()
             }

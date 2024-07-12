@@ -6,7 +6,6 @@ import android.location.Location
 import android.location.LocationManager
 import android.util.Log
 import androidx.core.location.LocationListenerCompat
-import com.hjq.permissions.Permission
 import com.jackcui.barcodetoolbox.MainActivity.Companion.showErrorToast
 
 class LocationUtils(context: Context) {
@@ -19,7 +18,7 @@ class LocationUtils(context: Context) {
 
     companion object {
         const val TAG = "LocationUtils"
-        val PERMISSION = arrayOf(Permission.ACCESS_FINE_LOCATION)
+        const val PERMISSION = android.Manifest.permission.ACCESS_FINE_LOCATION
     }
 
     /**

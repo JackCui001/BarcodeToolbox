@@ -16,9 +16,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
-import com.hjq.permissions.OnPermissionCallback
-import com.hjq.permissions.Permission
-import com.hjq.permissions.XXPermissions
 import com.huawei.hms.hmsscankit.ScanUtil
 import com.huawei.hms.ml.scan.HmsScan
 import com.jackcui.barcodetoolbox.MainActivity.Companion.TAG
@@ -31,6 +28,8 @@ import com.jackcui.barcodetoolbox.databinding.DialogEmailBinding
 import com.jackcui.barcodetoolbox.databinding.DialogPhoneBinding
 import com.jackcui.barcodetoolbox.databinding.DialogSmsBinding
 import com.jackcui.barcodetoolbox.databinding.DialogWifiBinding
+import com.permissionx.guolindev.PermissionX
+import com.permissionx.guolindev.request.ForwardScope
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -49,6 +48,13 @@ class GenerateCodeActivity : AppCompatActivity() {
     private var dlgEmailBd: DialogEmailBinding? = null
     private var dlgWifiBd: DialogWifiBinding? = null
     private var dlgCoordBd: DialogCoordBinding? = null
+
+    enum class TaskType {
+        CONTACT,
+        PHONE,
+        SMS,
+        EMAIL
+    }
 
     private val convertInfoDismissCallback = DialogInterface.OnDismissListener {
         if (res.isNotBlank()) {
@@ -533,7 +539,7 @@ class GenerateCodeActivity : AppCompatActivity() {
             }
         }
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-            execContactTask(3)
+            execContactTask(TaskType.EMAIL)
         }
     }
 
@@ -558,7 +564,7 @@ class GenerateCodeActivity : AppCompatActivity() {
             }
         }
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-            execContactTask(1)
+            execContactTask(TaskType.PHONE)
         }
     }
 
@@ -594,7 +600,7 @@ class GenerateCodeActivity : AppCompatActivity() {
             }
         }
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-            execContactTask(2)
+            execContactTask(TaskType.SMS)
         }
     }
 
@@ -609,7 +615,7 @@ class GenerateCodeActivity : AppCompatActivity() {
                     contactStr.clear()
                 }.setOnDismissListener(convertInfoDismissCallback).show()
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-            execContactTask(0)
+            execContactTask(TaskType.CONTACT)
         }
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             dlgContactBd?.run {
@@ -692,38 +698,40 @@ class GenerateCodeActivity : AppCompatActivity() {
         }
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
             // 定位
-            XXPermissions.with(this).permission(LocationUtils.PERMISSION)
-                .request(object : OnPermissionCallback {
-                    override fun onGranted(permissions: MutableList<String>, allGranted: Boolean) {
-                        if (!allGranted) {
-                            return
-                        }
-                        dlgCoordBd?.run {
-                            tilCoordLongitude.helperText = "定位中"
-                            val locationUtils = LocationUtils(this@GenerateCodeActivity)
-                            locationUtils.getLocationInfo {
-                                tilCoordLongitude.helperText = "定位成功"
-                                tietCoordLatitude.setText(it.latitude.toString())
-                                tietCoordLongitude.setText(it.longitude.toString())
-                            }
+            PermissionX.init(this)
+                .permissions(LocationUtils.PERMISSION)
+                .explainReasonBeforeRequest()
+                .onExplainRequestReason { scope, deniedList ->
+                    scope.showRequestReasonDialog(
+                        deniedList,
+                        "定位必须使用以下权限",
+                        "好的",
+                        "取消"
+                    )
+                }
+                .onForwardToSettings { scope: ForwardScope, deniedList: MutableList<String> ->
+                    scope.showForwardToSettingsDialog(
+                        deniedList,
+                        "授权请求被永久拒绝\n您需要去应用程序设置中手动开启权限",
+                        "跳转到设置",
+                        "取消"
+                    )
+                }
+                .request { allGranted, grantedList, deniedList ->
+                    if (!allGranted) {
+                        showErrorToast("授权请求被拒绝")
+                        return@request
+                    }
+                    dlgCoordBd?.run {
+                        tilCoordLongitude.helperText = "定位中"
+                        val locationUtils = LocationUtils(this@GenerateCodeActivity)
+                        locationUtils.getLocationInfo {
+                            tilCoordLongitude.helperText = "定位成功"
+                            tietCoordLatitude.setText(it.latitude.toString())
+                            tietCoordLongitude.setText(it.longitude.toString())
                         }
                     }
-
-                    override fun onDenied(
-                        permissions: MutableList<String>,
-                        doNotAskAgain: Boolean
-                    ) {
-                        if (doNotAskAgain) {
-                            showErrorToast("权限请求被永久拒绝，请在系统设置中手动授权。\n本应用仅申请必要权限，请放心授权。")
-                            // 如果是被永久拒绝就跳转到应用权限系统设置页面
-                            XXPermissions.startPermissionActivity(
-                                this@GenerateCodeActivity, permissions
-                            )
-                        } else {
-                            showErrorToast("位置权限请求被拒绝，定位必须使用此权限。\n本应用仅申请必要权限，请放心授权。")
-                        }
-                    }
-                })
+                }
         }
     }
 
@@ -731,30 +739,37 @@ class GenerateCodeActivity : AppCompatActivity() {
      * 请求写存储权限，并保存二维码图片
      */
     private fun reqPermAndMakeFile() {
-        XXPermissions.with(this).permission(Permission.WRITE_EXTERNAL_STORAGE)
-            .request(object : OnPermissionCallback {
-                override fun onGranted(permissions: MutableList<String>, allGranted: Boolean) {
-                    if (!allGranted) {
-                        return
-                    }
-                    writeCodePicFile()
+        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            android.Manifest.permission.READ_MEDIA_IMAGES
+        } else {
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        }
+        PermissionX.init(this)
+            .permissions(permission)
+            .explainReasonBeforeRequest()
+            .onExplainRequestReason { scope, deniedList ->
+                scope.showRequestReasonDialog(
+                    deniedList,
+                    "保存条码图片必须使用以下权限",
+                    "好的",
+                    "取消"
+                )
+            }
+            .onForwardToSettings { scope: ForwardScope, deniedList: MutableList<String> ->
+                scope.showForwardToSettingsDialog(
+                    deniedList,
+                    "授权请求被永久拒绝\n您需要去应用程序设置中手动开启权限",
+                    "跳转到设置",
+                    "取消"
+                )
+            }
+            .request { allGranted, grantedList, deniedList ->
+                if (!allGranted) {
+                    showErrorToast("授权请求被拒绝")
+                    return@request
                 }
-
-                override fun onDenied(
-                    permissions: MutableList<String>,
-                    doNotAskAgain: Boolean
-                ) {
-                    if (doNotAskAgain) {
-                        showErrorToast("权限请求被永久拒绝，请在系统设置中手动授权。\n本应用仅申请必要权限，请放心授权。")
-                        // 如果是被永久拒绝就跳转到应用权限系统设置页面
-                        XXPermissions.startPermissionActivity(
-                            this@GenerateCodeActivity, permissions
-                        )
-                    } else {
-                        showErrorToast("存储权限请求被拒绝，保存条码图片必须使用此权限\n本应用仅申请必要权限，请放心授权。")
-                    }
-                }
-            })
+                writeCodePicFile()
+            }
     }
 
     /**
@@ -765,70 +780,79 @@ class GenerateCodeActivity : AppCompatActivity() {
      * 2 - 短信界面
      * 3 - 邮件界面
      */
-    private fun execContactTask(type: Int) {
-        XXPermissions.with(this).permission(ContactUtils.PERMISSION)
-            .request(object : OnPermissionCallback {
-                override fun onGranted(permissions: MutableList<String>, allGranted: Boolean) {
-                    when (type) {
-                        0 -> contactLau.launch(null)
-                        1 -> phoneLau.launch(null)
-                        2 -> smsLau.launch(null)
-                        3 -> emailLau.launch(null)
-                    }
+    private fun execContactTask(type: TaskType) {
+        PermissionX.init(this)
+            .permissions(ContactUtils.PERMISSION)
+            .explainReasonBeforeRequest()
+            .onExplainRequestReason { scope, deniedList ->
+                scope.showRequestReasonDialog(
+                    deniedList,
+                    "联系人相关操作必须使用以下权限",
+                    "好的",
+                    "取消"
+                )
+            }
+            .onForwardToSettings { scope: ForwardScope, deniedList: MutableList<String> ->
+                scope.showForwardToSettingsDialog(
+                    deniedList,
+                    "授权请求被永久拒绝\n您需要去应用程序设置中手动开启权限",
+                    "跳转到设置",
+                    "取消"
+                )
+            }
+            .request { allGranted, grantedList, deniedList ->
+                if (!allGranted) {
+                    showErrorToast("授权请求被拒绝")
+                    return@request
                 }
-
-                override fun onDenied(
-                    permissions: MutableList<String>,
-                    doNotAskAgain: Boolean
-                ) {
-                    if (doNotAskAgain) {
-                        showErrorToast("权限请求被永久拒绝，请在系统设置中手动授权\n本应用仅申请必要权限，请放心授权")
-                        // 如果是被永久拒绝就跳转到应用权限系统设置页面
-                        XXPermissions.startPermissionActivity(
-                            this@GenerateCodeActivity, permissions
-                        )
-                    } else {
-                        showErrorToast("读取联系人权限请求被拒绝，导入联系人必须使用此权限\n本应用仅申请必要权限，请放心授权")
-                    }
+                when (type) {
+                    TaskType.CONTACT -> contactLau.launch(null)
+                    TaskType.PHONE -> phoneLau.launch(null)
+                    TaskType.SMS -> smsLau.launch(null)
+                    TaskType.EMAIL -> emailLau.launch(null)
                 }
-            })
-
+            }
     }
 
     /**
      * 申请位置权限，扫描周围热点
      */
     private fun scanWifi() {
-        XXPermissions.with(this).permission(WifiUtils.PERMISSION)
-            .request(object : OnPermissionCallback {
-                override fun onGranted(permissions: MutableList<String>, allGranted: Boolean) {
-                    val wifiUtils = WifiUtils(this@GenerateCodeActivity)
-                    val ssidMap = wifiUtils.scanWifiAndGetInfo()
-                    if (ssidMap.isEmpty()) {
-                        return
-                    }
-                    dlgWifiBd?.run {
-                        val ssids = ssidMap.keys.toTypedArray()
-                        (actvWifiSsid as MaterialAutoCompleteTextView).setSimpleItems(ssids)
-                        tilWifiSsid.helperText = "搜索到 ${ssids.size} 个热点，请手动选择"
-                    }
+        PermissionX.init(this)
+            .permissions(WifiUtils.PERMISSION)
+            .explainReasonBeforeRequest()
+            .onExplainRequestReason { scope, deniedList ->
+                scope.showRequestReasonDialog(
+                    deniedList,
+                    "扫描热点必须使用以下权限",
+                    "好的",
+                    "取消"
+                )
+            }
+            .onForwardToSettings { scope: ForwardScope, deniedList: MutableList<String> ->
+                scope.showForwardToSettingsDialog(
+                    deniedList,
+                    "授权请求被永久拒绝\n您需要去应用程序设置中手动开启权限",
+                    "跳转到设置",
+                    "取消"
+                )
+            }
+            .request { allGranted, grantedList, deniedList ->
+                if (!allGranted) {
+                    showErrorToast("授权请求被拒绝")
+                    return@request
                 }
-
-                override fun onDenied(
-                    permissions: MutableList<String>,
-                    doNotAskAgain: Boolean
-                ) {
-                    if (doNotAskAgain) {
-                        showErrorToast("权限请求被永久拒绝，请在系统设置中手动授权\n本应用仅申请必要权限，请放心授权")
-                        // 如果是被永久拒绝就跳转到应用权限系统设置页面
-                        XXPermissions.startPermissionActivity(
-                            this@GenerateCodeActivity, permissions
-                        )
-                    } else {
-                        showErrorToast("位置权限请求被拒绝，扫描热点必须使用此权限\n本应用仅申请必要权限，请放心授权")
-                    }
+                val wifiUtils = WifiUtils(this@GenerateCodeActivity)
+                val ssidMap = wifiUtils.scanWifiAndGetInfo()
+                if (ssidMap.isEmpty()) {
+                    return@request
                 }
-            })
+                dlgWifiBd?.run {
+                    val ssids = ssidMap.keys.toTypedArray()
+                    (actvWifiSsid as MaterialAutoCompleteTextView).setSimpleItems(ssids)
+                    tilWifiSsid.helperText = "搜索到 ${ssids.size} 个热点，请手动选择"
+                }
+            }
     }
 
     override fun onResume() {

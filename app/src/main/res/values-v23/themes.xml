@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.barcodeToolbox" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorEfab">#388E3C</item>
+        <item name="colorOnEfab">#ffffff</item>
+        <item name="colorEfabContainer">#94f990</item>
+        <item name="colorOnEfabContainer">#002204</item>
+        <item name="harmonizeEfab">true</item>
+
+        <item name="alertDialogTheme">@style/ThemeOverlay.Material3.MaterialAlertDialog</item>
+        <item name="dialogCornerRadius">28dp</item>
+
+        <!-- 状态栏颜色 -->
+        <item name="android:statusBarColor">?attr/colorPrimaryContainer</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <!-- 导航栏颜色 -->
+        <item name="android:navigationBarColor">?attr/colorPrimaryContainer</item>
+    </style>
+</resources>

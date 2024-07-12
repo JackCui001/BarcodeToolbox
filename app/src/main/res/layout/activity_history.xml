@@ -29,15 +29,16 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="@tools:sample/date/mmddyy" />
 
-        <Button
-            android:id="@+id/btn_removeRecord"
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/efab_removeRecord"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
             android:text="删除记录"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:icon="@drawable/outline_delete_sweep_24" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

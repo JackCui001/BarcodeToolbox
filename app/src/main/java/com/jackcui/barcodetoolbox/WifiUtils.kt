@@ -17,11 +17,10 @@ import android.os.Bundle
 import android.provider.Settings.ACTION_WIFI_ADD_NETWORKS
 import android.provider.Settings.EXTRA_WIFI_NETWORK_LIST
 import androidx.annotation.RequiresApi
-import com.hjq.permissions.Permission
-import com.hjq.permissions.XXPermissions
 import com.jackcui.barcodetoolbox.MainActivity.Companion.WIFI_INTENT_REQ_CODE
 import com.jackcui.barcodetoolbox.MainActivity.Companion.showErrorToast
 import com.jackcui.barcodetoolbox.MainActivity.Companion.showInfoToast
+import com.permissionx.guolindev.PermissionX
 
 
 typealias WlanInfo = MutableMap<String, String>
@@ -33,7 +32,7 @@ class WifiUtils(context: Context) {
 
     companion object {
         const val TAG = "WifiUtils"
-        val PERMISSION = arrayOf(Permission.ACCESS_FINE_LOCATION)
+        const val PERMISSION = android.Manifest.permission.ACCESS_FINE_LOCATION
         var ssid = ""
     }
 
@@ -47,7 +46,7 @@ class WifiUtils(context: Context) {
     @SuppressLint("MissingPermission")
     fun scanWifiAndGetInfo(): WlanInfo {
         val ssidMap: WlanInfo = mutableMapOf()
-        val bGranted = XXPermissions.isGranted(mContext, PERMISSION)
+        val bGranted = PermissionX.isGranted(mContext, PERMISSION)
         val bWifiEnabled = enableWifi()
         if (!bGranted || !bWifiEnabled) {
             return ssidMap
@@ -66,7 +65,7 @@ class WifiUtils(context: Context) {
      */
     @SuppressLint("MissingPermission")
     fun connectWifi(ssid: String, password: String) {
-        val bGranted = XXPermissions.isGranted(mContext, PERMISSION)
+        val bGranted = PermissionX.isGranted(mContext, PERMISSION)
         val bWifiEnabled = enableWifi()
         if (!bGranted || !bWifiEnabled) {
             return
