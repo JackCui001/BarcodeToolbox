@@ -299,7 +299,8 @@ class GenerateCodeActivity : AppCompatActivity() {
         bd.btnSpInfoConvert.setOnClickListener {
             val items = arrayOf("Wi-Fi", "Email", "联系人", "电话号码", "短信", "坐标")
 
-            MaterialAlertDialogBuilder(this).setTitle("请选择一种信息类型")
+            MaterialAlertDialogBuilder(this)
+                .setTitle("请选择一种信息类型")
                 .setItems(items) { _, which ->
                     when (which) {
                         0 -> showWifiDialog(res)
@@ -309,7 +310,8 @@ class GenerateCodeActivity : AppCompatActivity() {
                         4 -> showSmsDialog(res)
                         5 -> showCoordDialog(res)
                     }
-                }.show()
+                }
+                .show()
         }
 
         bd.btnGenCode.setOnClickListener {
@@ -775,10 +777,7 @@ class GenerateCodeActivity : AppCompatActivity() {
     /**
      * 申请联系人权限，执行相应任务
      * @param type
-     * 0 - 联系人界面
-     * 1 - 电话号码界面
-     * 2 - 短信界面
-     * 3 - 邮件界面
+     * 详情见 enum class TaskType
      */
     private fun execContactTask(type: TaskType) {
         PermissionX.init(this)

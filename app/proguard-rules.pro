@@ -44,7 +44,7 @@
 -keep class com.huawei.hms.** {*;}
 
 # hjq's modules
--keep class com.hjq.permissions.** {*;}
+#-keep class com.hjq.permissions.** {*;}
 -keep class com.hjq.toast.** {*;}
 
 # FastJson2
