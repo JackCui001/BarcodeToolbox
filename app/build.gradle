@@ -11,7 +11,7 @@ android {
         applicationId "com.jackcui.barcodetoolbox"
         minSdk 19
         targetSdk 34
-        versionCode 2407121
+        versionCode 2407301
         versionName "1.3.2"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -26,8 +26,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_22
+        targetCompatibility JavaVersion.VERSION_22
     }
 
     buildFeatures {
@@ -35,8 +35,11 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = '17'
+        languageVersion = "2.0"
+        apiVersion = "2.0"
+        jvmTarget = "22"
     }
+
 }
 
 dependencies {
