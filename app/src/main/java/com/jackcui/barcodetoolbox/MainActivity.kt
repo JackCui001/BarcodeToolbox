@@ -1,18 +1,11 @@
 package com.jackcui.barcodetoolbox
 
-import android.content.ActivityNotFoundException
-import android.content.ContentValues
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.ContactsContract
-import android.provider.ContactsContract.CommonDataKinds.Email
-import android.provider.ContactsContract.CommonDataKinds.Phone
-import android.provider.ContactsContract.CommonDataKinds.StructuredPostal
-import android.provider.ContactsContract.Intents.Insert
 import android.provider.MediaStore
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
@@ -36,18 +29,12 @@ import com.hjq.toast.Toaster
 import com.hjq.toast.style.CustomToastStyle
 import com.huawei.hms.hmsscankit.ScanUtil
 import com.huawei.hms.ml.scan.HmsScan
-import com.huawei.hms.ml.scan.HmsScan.AddressInfo
-import com.huawei.hms.ml.scan.HmsScan.EmailContent
-import com.huawei.hms.ml.scan.HmsScan.TelPhoneNumber
-import com.huawei.hms.ml.scan.HmsScan.WiFiConnectionInfo
 import com.huawei.hms.ml.scan.HmsScanAnalyzerOptions
 import com.huawei.hms.ml.scan.HmsScanFrame
 import com.huawei.hms.ml.scan.HmsScanFrameOptions
-import com.jackcui.barcodetoolbox.WifiUtils.Companion.ssid
+import com.jackcui.barcodetoolbox.WifiHelper.Companion.ssid
 import com.jackcui.barcodetoolbox.databinding.ActivityMainBinding
 import com.jackcui.barcodetoolbox.databinding.DialogHistoryPickerBinding
-import com.permissionx.guolindev.PermissionX
-import com.permissionx.guolindev.request.ForwardScope
 import java.io.File
 import java.io.Serializable
 import java.text.SimpleDateFormat
@@ -104,6 +91,10 @@ class MainActivity : AppCompatActivity() {
         const val WAIT_FOR_SCAN = "等待识别"
         const val INVOKED_BY_INTENT_VIEW = "【由外部应用打开文件调用】"
         const val INVOKED_BY_INTENT_SEND = "【由外部应用分享文件调用】"
+        const val SCAN_MODE_ASK = "ask"
+        const val SCAN_MODE_NORMAL = "normal"
+        const val SCAN_MODE_CAMERA = "camera"
+        const val SCAN_MODE_FILE = "file"
 
         fun showSnackbar(view: View, msg: String, duration: Int) {
             Snackbar.make(view, msg, duration).show()
@@ -475,43 +466,29 @@ class MainActivity : AppCompatActivity() {
      * Apply for permissions.
      */
     private fun reqPermAndScan(hwScan: Boolean) {
-        val permissions = mutableListOf<String>()
-        permissions.add(android.Manifest.permission.CAMERA)
-        permissions.add(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                android.Manifest.permission.READ_MEDIA_IMAGES
-            } else {
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-            }
-        )
-        PermissionX.init(this)
-            .permissions(permissions)
-            .explainReasonBeforeRequest()
-            .onExplainRequestReason { scope, deniedList ->
-                scope.showRequestReasonDialog(
-                    deniedList,
-                    "扫码必须使用以下权限",
-                    "好的",
-                    "取消"
-                )
-            }
-            .onForwardToSettings { scope: ForwardScope, deniedList: MutableList<String> ->
-                scope.showForwardToSettingsDialog(
-                    deniedList,
-                    "授权请求被永久拒绝\n您需要去应用程序设置中手动开启权限",
-                    "跳转到设置",
-                    "取消"
-                )
-            }
-            .request { allGranted, grantedList, deniedList ->
-                if (!allGranted) {
-                    showErrorToast("授权请求被拒绝")
-                    return@request
+        val permissions = mutableListOf<String>().apply {
+            add(android.Manifest.permission.CAMERA)
+            add(
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    android.Manifest.permission.READ_MEDIA_IMAGES
+                } else {
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
                 }
+            )
+        }
+
+        PermissionHelper.requestPermissions(
+            this,
+            PermissionHelper.PermissionConfig(
+                permissions = permissions,
+                explainReasonTitle = "扫码必须使用以下权限"
+            ),
+            onGranted = {
                 if (hwScan) {
-                    val opt =
-                        HmsScanAnalyzerOptions.Creator().setHmsScanTypes(HmsScan.ALL_SCAN_TYPE)
-                            .setParseResult(bParse).create()
+                    val opt = HmsScanAnalyzerOptions.Creator()
+                        .setHmsScanTypes(HmsScan.ALL_SCAN_TYPE)
+                        .setParseResult(bParse)
+                        .create()
                     ScanUtil.startScan(this@MainActivity, HW_SCAN_REQ_CODE, opt)
                 } else {
                     val file = File("${externalCacheDir}${File.separator}tmp_take_photo.png")
@@ -521,614 +498,29 @@ class MainActivity : AppCompatActivity() {
                     file.createNewFile()
                     file.deleteOnExit()
                     val uri = FileProvider.getUriForFile(
-                        this@MainActivity, "com.jackcui.barcodetoolbox.fileprovider", file
+                        this@MainActivity,
+                        "com.jackcui.barcodetoolbox.fileprovider",
+                        file
                     )
-                    file.deleteOnExit()
                     saveImageUri = uri
                     takePhotoLauncher.launch(uri)
                 }
             }
+        )
     }
 
-    /**
-     * 重置配置 fontScale：保持字体比例不变，始终为 1.
-     */
 
-//    override fun attachBaseContext(newBase: Context) {
-//        super.attachBaseContext(newBase)
-//        overrideFontScale(newBase)
-//    }
 
-//    private fun overrideFontScale(context: Context?) {
-//        if (context == null) {
-//            return
-//        }
-//        val configuration = context.resources.configuration
-//        configuration.fontScale = 1f
-//        applyOverrideConfiguration(configuration)
-//    }
+    private val scanResultParser = ScanResultParser { desc, text, iconRes, listener ->
+        bd.extendedFabAction.contentDescription = desc
+        bd.extendedFabAction.text = text
+        bd.extendedFabAction.setIconResource(iconRes)
+        bd.extendedFabAction.setOnClickListener(listener)
+        bd.extendedFabAction.show()
+    }
 
     private fun concatCodeInfo(res: HmsScan): String {
-        val scanType = res.getScanType()
-        val scanTypeForm = res.getScanTypeForm()
-        val newText = StringBuilder()
-        when (scanType) {
-            HmsScan.QRCODE_SCAN_TYPE -> {
-                newText.append("QR 码 - ")
-            }
-
-            HmsScan.AZTEC_SCAN_TYPE -> {
-                newText.append("AZTEC 码 - ")
-            }
-
-            HmsScan.DATAMATRIX_SCAN_TYPE -> {
-                newText.append("Data Matrix 码 - ")
-            }
-
-            HmsScan.PDF417_SCAN_TYPE -> {
-                newText.append("PDF417 码 - ")
-            }
-
-            HmsScan.CODE93_SCAN_TYPE -> {
-                newText.append("Code93 码 - ")
-            }
-
-            HmsScan.CODE39_SCAN_TYPE -> {
-                newText.append("Code39 码 - ")
-            }
-
-            HmsScan.CODE128_SCAN_TYPE -> {
-                newText.append("Code128 码 - ")
-            }
-
-            HmsScan.EAN13_SCAN_TYPE -> {
-                newText.append("EAN13 码 - ")
-            }
-
-            HmsScan.EAN8_SCAN_TYPE -> {
-                newText.append("EAN8 码 - ")
-            }
-
-            HmsScan.ITF14_SCAN_TYPE -> {
-                newText.append("ITF14 码 - ")
-            }
-
-            HmsScan.UPCCODE_A_SCAN_TYPE -> {
-                newText.append("UPC_A 码 - ")
-            }
-
-            HmsScan.UPCCODE_E_SCAN_TYPE -> {
-                newText.append("UPC_E 码 - ")
-            }
-
-            HmsScan.CODABAR_SCAN_TYPE -> {
-                newText.append("Codabar 码 - ")
-            }
-
-            HmsScan.WX_SCAN_TYPE -> {
-                newText.append("微信码")
-            }
-
-            HmsScan.MULTI_FUNCTIONAL_SCAN_TYPE -> {
-                newText.append("多功能码")
-            }
-        }
-        when (scanTypeForm) {
-            HmsScan.ARTICLE_NUMBER_FORM -> {
-                newText.appendLine("产品信息：")
-                newText.appendLine(res.getOriginalValue())
-            }
-
-            HmsScan.CONTACT_DETAIL_FORM -> {
-                newText.appendLine("联系人：")
-                val tmp = res.getContactDetail()
-                val peopleName = tmp.getPeopleName()
-                val tels = tmp.getTelPhoneNumbers()
-                val emailContentList = tmp.emailContents
-                val contactLinks = tmp.getContactLinks()
-                val company = tmp.getCompany()
-                val title = tmp.getTitle()
-                val addrInfoList = tmp.getAddressesInfos()
-                val note = tmp.getNote()
-                val data = arrayListOf<ContentValues>()   // 用于插入联系人
-                peopleName?.run {
-                    newText.append("姓名： ")
-                    newText.appendLine(getFullName())
-                }
-                if (!tels.isNullOrEmpty()) {
-                    newText.appendLine("电话：")
-                    for (tel in tels) {
-                        val row = ContentValues().apply {
-                            put(ContactsContract.Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
-                        }
-                        when (tel.getUseType()) {
-                            TelPhoneNumber.CELLPHONE_NUMBER_USE_TYPE -> {
-                                newText.append("  手机： ")
-                                row.put(Phone.TYPE, Phone.TYPE_MOBILE)
-                            }
-
-                            TelPhoneNumber.RESIDENTIAL_USE_TYPE -> {
-                                newText.append("  住家： ")
-                                row.put(Phone.TYPE, Phone.TYPE_HOME)
-                            }
-
-                            TelPhoneNumber.OFFICE_USE_TYPE -> {
-                                newText.append("  办公： ")
-                                row.put(Phone.TYPE, Phone.TYPE_WORK)
-                            }
-
-                            TelPhoneNumber.FAX_USE_TYPE -> {
-                                newText.append("  传真： ")
-                                row.put(Phone.TYPE, Phone.TYPE_FAX_WORK)
-                            }
-
-                            TelPhoneNumber.OTHER_USE_TYPE -> {
-                                newText.append("  其他： ")
-                                row.put(Phone.TYPE, Phone.TYPE_OTHER)
-                            }
-                        }
-                        val phoneNum = tel.getTelPhoneNumber()
-                        newText.appendLine(phoneNum)
-
-                        row.put(Phone.NUMBER, phoneNum)
-                        data.add(row)
-                    }
-                }
-                if (!emailContentList.isNullOrEmpty()) {
-                    newText.appendLine("邮箱： ")
-                    for (email in emailContentList) {
-                        val row = ContentValues().apply {
-                            put(ContactsContract.Data.MIMETYPE, Email.CONTENT_ITEM_TYPE)
-                        }
-                        when (email.getAddressType()) {
-                            EmailContent.RESIDENTIAL_USE_TYPE -> {
-                                newText.append("  住家： ")
-                                row.put(Email.TYPE, Email.TYPE_HOME)
-                            }
-
-                            EmailContent.OFFICE_USE_TYPE -> {
-                                newText.append("  办公： ")
-                                row.put(Email.TYPE, Email.TYPE_WORK)
-                            }
-
-                            EmailContent.OTHER_USE_TYPE -> {
-                                newText.append("  其他： ")
-                                row.put(Email.TYPE, Email.TYPE_OTHER)
-                            }
-                        }
-                        val emailAddr = email.getAddressInfo()
-                        newText.appendLine(emailAddr)
-
-                        row.put(Email.ADDRESS, emailAddr)
-                        data.add(row)
-                    }
-                }
-                if (!contactLinks.isNullOrEmpty()) {
-                    newText.append("URL： ")
-                    newText.appendLine(contactLinks.toList().joinToString())
-                }
-                if (!company.isNullOrEmpty()) {
-                    newText.append("公司： ")
-                    newText.appendLine(company)
-                }
-                if (!title.isNullOrEmpty()) {
-                    newText.append("职位： ")
-                    newText.appendLine(title)
-                }
-                if (!addrInfoList.isNullOrEmpty()) {
-                    newText.appendLine("地址：")
-                    for (addrInfo in addrInfoList) {
-                        val row = ContentValues().apply {
-                            put(ContactsContract.Data.MIMETYPE, StructuredPostal.CONTENT_ITEM_TYPE)
-                        }
-                        when (addrInfo.getAddressType()) {
-                            AddressInfo.RESIDENTIAL_USE_TYPE -> {
-                                newText.append("  住家： ")
-                                row.put(StructuredPostal.TYPE, StructuredPostal.TYPE_HOME)
-                            }
-
-                            AddressInfo.OFFICE_TYPE -> {
-                                newText.append("  办公： ")
-                                row.put(StructuredPostal.TYPE, StructuredPostal.TYPE_WORK)
-                            }
-
-                            AddressInfo.OTHER_USE_TYPE -> {
-                                newText.append("  其他： ")
-                                row.put(StructuredPostal.TYPE, StructuredPostal.TYPE_OTHER)
-                            }
-                        }
-                        val addrStr = addrInfo.getAddressDetails().toList().joinToString()
-                        newText.appendLine(addrStr)
-
-                        row.put(StructuredPostal.FORMATTED_ADDRESS, addrStr)
-                        data.add(row)
-                    }
-                }
-                if (!note.isNullOrEmpty()) {
-                    newText.append("备注： ")
-                    newText.appendLine(note)
-                }
-
-                // 设置动作按钮
-                bd.extendedFabAction.contentDescription = "新建联系人"
-                bd.extendedFabAction.text = "新建联系人"
-                bd.extendedFabAction.setIconResource(R.drawable.outline_person_add_alt_24)
-                bd.extendedFabAction.setOnClickListener {
-                    val itt = Intent(Insert.ACTION, ContactsContract.Contacts.CONTENT_URI)
-                    // 姓名信息
-                    peopleName?.run {
-                        itt.putExtra(Insert.NAME, getFullName())
-                    }
-                    // 公司信息
-                    if (!company.isNullOrEmpty()) {
-                        itt.putExtra(Insert.COMPANY, company)
-                    }
-                    // 职位信息
-                    if (!title.isNullOrEmpty()) {
-                        itt.putExtra(Insert.JOB_TITLE, title)
-                    }
-                    // 电话信息 + 邮箱信息 + 地址信息
-                    itt.putParcelableArrayListExtra(Insert.DATA, data)
-                    // 备注信息
-                    if (!note.isNullOrEmpty()) {
-                        itt.putExtra(Insert.NOTES, note)
-                    }
-                    startActivity(itt)
-                }
-                bd.extendedFabAction.show()
-            }
-
-            HmsScan.DRIVER_INFO_FORM -> {
-                newText.appendLine("驾照信息：")
-                val tmp = res.getDriverInfo()
-                val familyName = tmp.getFamilyName()
-                val middleName = tmp.getMiddleName()
-                val givenName = tmp.getGivenName()
-                val sex = tmp.getSex()
-                val dateOfBirth = tmp.getDateOfBirth()
-                val countryOfIssue = tmp.getCountryOfIssue()
-                val certType = tmp.getCertificateType()
-                val certNum = tmp.getCertificateNumber()
-                val dateOfIssue = tmp.getDateOfIssue()
-                val dateOfExpire = tmp.getDateOfExpire()
-                val province = tmp.getProvince()
-                val city = tmp.getCity()
-                val avenue = tmp.getAvenue()
-                val zipCode = tmp.getZipCode()
-                if (!familyName.isNullOrEmpty()) {
-                    newText.append("姓： ")
-                    newText.appendLine(familyName)
-                }
-                if (!middleName.isNullOrEmpty()) {
-                    newText.append("中间名： ")
-                    newText.appendLine(middleName)
-                }
-                if (!givenName.isNullOrEmpty()) {
-                    newText.append("名： ")
-                    newText.appendLine(givenName)
-                }
-                if (!sex.isNullOrEmpty()) {
-                    newText.append("性别： ")
-                    newText.appendLine(sex)
-                }
-                if (!dateOfBirth.isNullOrEmpty()) {
-                    newText.append("出生日期： ")
-                    newText.appendLine(dateOfBirth)
-                }
-                if (!countryOfIssue.isNullOrEmpty()) {
-                    newText.append("驾照发放国： ")
-                    newText.appendLine(countryOfIssue)
-                }
-                if (!certType.isNullOrEmpty()) {
-                    newText.append("驾照类型： ")
-                    newText.appendLine(certType)
-                }
-                if (!certNum.isNullOrEmpty()) {
-                    newText.append("驾照号码： ")
-                    newText.appendLine(certNum)
-                }
-                if (!dateOfIssue.isNullOrEmpty()) {
-                    newText.append("发证日期： ")
-                    newText.appendLine(dateOfIssue)
-                }
-                if (!dateOfExpire.isNullOrEmpty()) {
-                    newText.append("过期日期： ")
-                    newText.appendLine(dateOfExpire)
-                }
-                if (!province.isNullOrEmpty()) {
-                    newText.append("省/州： ")
-                    newText.appendLine(province)
-                }
-                if (!city.isNullOrEmpty()) {
-                    newText.append("城市： ")
-                    newText.appendLine(city)
-                }
-                if (!avenue.isNullOrEmpty()) {
-                    newText.append("街道： ")
-                    newText.appendLine(avenue)
-                }
-                if (!zipCode.isNullOrEmpty()) {
-                    newText.append("邮政编码： ")
-                    newText.appendLine(zipCode)
-                }
-            }
-
-            HmsScan.EMAIL_CONTENT_FORM -> {
-                newText.appendLine("Email：")
-                val email = res.getEmailContent()
-                val addrInfo = email.getAddressInfo()
-                val subjectInfo = email.getSubjectInfo()
-                val bodyInfo = email.getBodyInfo().substringBeforeLast(";;")
-                if (!addrInfo.isNullOrEmpty()) {
-                    newText.append("收件邮箱： ")
-                    newText.appendLine(addrInfo)
-                }
-                if (!subjectInfo.isNullOrEmpty()) {
-                    newText.append("主题： ")
-                    newText.appendLine(subjectInfo)
-                }
-                if (bodyInfo.isNotEmpty()) {
-                    newText.append("内容： ")
-                    newText.appendLine(bodyInfo)
-                }
-
-                // 设置动作按钮
-                bd.extendedFabAction.contentDescription = "发送邮件"
-                bd.extendedFabAction.text = "发送邮件"
-                bd.extendedFabAction.setIconResource(R.drawable.outline_email_24)
-                bd.extendedFabAction.setOnClickListener {
-                    val itt = Intent(Intent.ACTION_SENDTO)
-                    itt.setData(Uri.parse("mailto:$addrInfo"))
-                    itt.putExtra(Intent.EXTRA_SUBJECT, subjectInfo)
-                    itt.putExtra(Intent.EXTRA_TEXT, bodyInfo)
-                    try {
-                        startActivity(itt)
-                    } catch (e: ActivityNotFoundException) {
-                        showErrorToast("未检测到邮箱应用")
-                    }
-                }
-                bd.extendedFabAction.show()
-            }
-
-            HmsScan.EVENT_INFO_FORM -> {
-                newText.appendLine("日历事件：")
-                val tmp = res.getEventInfo()
-                val abstractInfo = tmp.getAbstractInfo()
-                val theme = tmp.getTheme()
-                val beginTimeInfo = tmp.getBeginTime()
-                val closeTimeInfo = tmp.getCloseTime()
-                val sponsor = tmp.getSponsor()
-                val placeInfo = tmp.getPlaceInfo()
-                val condition = tmp.getCondition()
-                if (!abstractInfo.isNullOrEmpty()) {
-                    newText.append("描述： ")
-                    newText.appendLine(abstractInfo)
-                }
-                if (!theme.isNullOrEmpty()) {
-                    newText.append("摘要： ")
-                    newText.appendLine(theme)
-                }
-                if (beginTimeInfo != null) {
-                    newText.append("开始时间： ")
-                    newText.appendLine(beginTimeInfo.originalValue)
-                }
-                if (closeTimeInfo != null) {
-                    newText.append("开始时间： ")
-                    newText.appendLine(closeTimeInfo.originalValue)
-                }
-                if (!sponsor.isNullOrEmpty()) {
-                    newText.append("组织者： ")
-                    newText.appendLine(sponsor)
-                }
-                if (!placeInfo.isNullOrEmpty()) {
-                    newText.append("地点： ")
-                    newText.appendLine(placeInfo)
-                }
-                if (!condition.isNullOrEmpty()) {
-                    newText.append("状态： ")
-                    newText.appendLine(condition)
-                }
-            }
-
-            HmsScan.ISBN_NUMBER_FORM -> {
-                newText.appendLine("ISBN 号：")
-                newText.appendLine(res.getOriginalValue())
-            }
-
-            HmsScan.LOCATION_COORDINATE_FORM -> {
-                newText.appendLine("坐标：")
-                val tmp = res.getLocationCoordinate()
-                val latitude = tmp.getLatitude()
-                val longitude = tmp.getLongitude()
-                newText.append("纬度： ")
-                newText.appendLine(latitude)
-                newText.append("经度： ")
-                newText.appendLine(longitude)
-
-                // 设置动作按钮
-                bd.extendedFabAction.contentDescription = "打开地图并定位"
-                bd.extendedFabAction.text = "定位"
-                bd.extendedFabAction.setIconResource(R.drawable.outline_location_on_24)
-                bd.extendedFabAction.setOnClickListener {
-                    // 打开地图应用查看坐标位置
-                    val uri = Uri.parse("geo:$latitude,$longitude")
-                    val itt = Intent(Intent.ACTION_VIEW, uri)
-                    // 查看本机是否存在地图应用
-                    try {
-                        startActivity(Intent.createChooser(itt, "选择一个地图应用以查看坐标位置"))
-                    } catch (e: ActivityNotFoundException) {
-                        showErrorToast("未检测到地图应用")
-                    }
-                }
-                bd.extendedFabAction.show()
-            }
-
-            HmsScan.PURE_TEXT_FORM -> {
-                newText.appendLine("文本：")
-                newText.appendLine(res.getOriginalValue())
-            }
-
-            HmsScan.SMS_FORM -> {
-                newText.appendLine("短信：")
-                val tmp = res.getSmsContent()
-                val destPhoneNumber = tmp.getDestPhoneNumber()
-                val smsBody = tmp.getMsgContent()
-                if (!destPhoneNumber.isNullOrEmpty()) {
-                    newText.append("收信人： ")
-                    newText.appendLine(destPhoneNumber)
-                }
-                if (!smsBody.isNullOrEmpty()) {
-                    newText.append("内容： ")
-                    newText.appendLine(smsBody)
-                }
-
-                // 设置动作按钮
-                bd.extendedFabAction.contentDescription = "发送短信"
-                bd.extendedFabAction.text = "发送短信"
-                bd.extendedFabAction.setIconResource(R.drawable.outline_sms_24)
-                bd.extendedFabAction.setOnClickListener {
-                    val uri = Uri.parse("smsto:$destPhoneNumber")
-                    val itt = Intent(Intent.ACTION_SENDTO, uri)
-                    itt.putExtra("sms_body", smsBody)
-                    startActivity(itt)
-                }
-                bd.extendedFabAction.show()
-            }
-
-            HmsScan.TEL_PHONE_NUMBER_FORM -> {
-                newText.appendLine("电话号码：")
-                val tmp = res.getTelPhoneNumber()
-                when (tmp.getUseType()) {
-                    TelPhoneNumber.CELLPHONE_NUMBER_USE_TYPE -> {
-                        newText.append("手机： ")
-                    }
-
-                    TelPhoneNumber.RESIDENTIAL_USE_TYPE -> {
-                        newText.append("住家： ")
-                    }
-
-                    TelPhoneNumber.OFFICE_USE_TYPE -> {
-                        newText.append("办公： ")
-                    }
-
-                    TelPhoneNumber.FAX_USE_TYPE -> {
-                        newText.append("传真： ")
-                    }
-
-                    TelPhoneNumber.OTHER_USE_TYPE -> {
-                        newText.append("其他： ")
-                    }
-                }
-                newText.appendLine(tmp.getTelPhoneNumber())
-
-                // 设置动作按钮
-                bd.extendedFabAction.contentDescription = "拨打电话"
-                bd.extendedFabAction.text = "拨打电话"
-                bd.extendedFabAction.setIconResource(R.drawable.baseline_phone_forwarded_24)
-                bd.extendedFabAction.setOnClickListener {
-                    val itt = Intent(Intent.ACTION_DIAL)
-                    itt.setData(Uri.parse("tel:${tmp.getTelPhoneNumber()}"))
-                    startActivity(itt)
-                }
-                bd.extendedFabAction.show()
-            }
-
-            HmsScan.URL_FORM -> {
-                newText.appendLine("URL 链接：")
-                val tmp = res.getLinkUrl()
-                val theme = tmp.getTheme()
-                val linkValue = tmp.linkValue
-                if (!theme.isNullOrEmpty()) {
-                    newText.append("标题： ")
-                    newText.appendLine(theme)
-                }
-                if (!linkValue.isNullOrEmpty()) {
-                    newText.append("链接： ")
-                    newText.appendLine(linkValue)
-                }
-            }
-
-            HmsScan.WIFI_CONNECT_INFO_FORM -> {
-                newText.appendLine("Wi-Fi 信息：")
-                val tmp = res.wiFiConnectionInfo
-                val ssid = tmp.getSsidNumber()
-                val pwd = tmp.getPassword()
-                val cipherMode = tmp.getCipherMode()
-                if (!ssid.isNullOrEmpty()) {
-                    newText.append("接入点名称： ")
-                    newText.appendLine(ssid)
-                }
-                if (!pwd.isNullOrEmpty()) {
-                    newText.append("密码： ")
-                    newText.appendLine(pwd)
-                }
-                newText.append("加密方式： ")
-                when (cipherMode) {
-                    WiFiConnectionInfo.WPA_MODE_TYPE -> {
-                        newText.appendLine("WPA/WPA2")
-                    }
-
-                    WiFiConnectionInfo.WEP_MODE_TYPE -> {
-                        newText.appendLine("WEP")
-                    }
-
-                    WiFiConnectionInfo.NO_PASSWORD_MODE_TYPE -> {
-                        newText.appendLine("开放")
-                    }
-
-                    WiFiConnectionInfo.SAE_MODE_TYPE -> {
-                        newText.appendLine("WPA3")
-                    }
-                }
-                newText.append("隐藏： ")
-                if (res.getOriginalValue().contains("H:true", ignoreCase = true)) {
-                    newText.appendLine("是")
-                } else {
-                    newText.appendLine("否")
-                }
-
-                // 设置动作按钮
-                bd.extendedFabAction.contentDescription = "连接热点"
-                bd.extendedFabAction.text = "连接热点"
-                bd.extendedFabAction.setIconResource(R.drawable.baseline_wifi_find_24)
-                bd.extendedFabAction.setOnClickListener {
-                    val wifiUtils = WifiUtils(this)
-                    PermissionX.init(this)
-                        .permissions(WifiUtils.PERMISSION)
-                        .explainReasonBeforeRequest()
-                        .onExplainRequestReason { scope, deniedList ->
-                            scope.showRequestReasonDialog(
-                                deniedList,
-                                "连接热点必须使用以下权限",
-                                "好的",
-                                "取消"
-                            )
-                        }
-                        .onForwardToSettings { scope: ForwardScope, deniedList: MutableList<String> ->
-                            scope.showForwardToSettingsDialog(
-                                deniedList,
-                                "授权请求被永久拒绝\n您需要去应用程序设置中手动开启权限",
-                                "跳转到设置",
-                                "取消"
-                            )
-                        }
-                        .request { allGranted, grantedList, deniedList ->
-                            if (!allGranted) {
-                                showErrorToast("授权请求被拒绝")
-                                return@request
-                            }
-                            wifiUtils.connectWifi(ssid, pwd)
-                        }
-                }
-                bd.extendedFabAction.show()
-            }
-
-            HmsScan.OTHER_FORM -> {
-                newText.appendLine("未知类型信息：")
-                newText.appendLine(res.getOriginalValue())
-            }
-        }
-        return newText.toString()
+        return scanResultParser.parse(res)
     }
 
     /**

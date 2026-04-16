@@ -28,8 +28,6 @@ import com.jackcui.barcodetoolbox.databinding.DialogEmailBinding
 import com.jackcui.barcodetoolbox.databinding.DialogPhoneBinding
 import com.jackcui.barcodetoolbox.databinding.DialogSmsBinding
 import com.jackcui.barcodetoolbox.databinding.DialogWifiBinding
-import com.permissionx.guolindev.PermissionX
-import com.permissionx.guolindev.request.ForwardScope
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -98,8 +96,8 @@ class GenerateCodeActivity : AppCompatActivity() {
                 tietContactJobTitle.setText("")
 
                 // 读取新数据并赋值
-                val contactUtils = ContactUtils(this@GenerateCodeActivity)
-                val contactInfo = contactUtils.getContactInfo(uri)
+                val contactHelper = ContactHelper(this@GenerateCodeActivity)
+                val contactInfo = contactHelper.getContactInfo(uri)
                 contactInfo?.let {
                     Log.d(TAG, it.toString())
                     if (it.name.isNotBlank()) {
@@ -169,8 +167,8 @@ class GenerateCodeActivity : AppCompatActivity() {
                 actvPhoneNumber.setText("")
                 (actvPhoneNumber as MaterialAutoCompleteTextView).setSimpleItems(emptyArray())
                 // 读取新数据并赋值
-                val contactUtils = ContactUtils(this@GenerateCodeActivity)
-                val contactInfo = contactUtils.getContactInfo(it)
+                val contactHelper = ContactHelper(this@GenerateCodeActivity)
+                val contactInfo = contactHelper.getContactInfo(it)
                 contactInfo?.let {
                     val phoneNumberCnt = it.phoneNumbers.size
                     if (phoneNumberCnt > 0) {
@@ -193,8 +191,8 @@ class GenerateCodeActivity : AppCompatActivity() {
                 actvSmsPhone.setText("")
                 (actvSmsPhone as MaterialAutoCompleteTextView).setSimpleItems(emptyArray())
                 // 读取新数据并赋值
-                val contactUtils = ContactUtils(this@GenerateCodeActivity)
-                val contactInfo = contactUtils.getContactInfo(it)
+                val contactHelper = ContactHelper(this@GenerateCodeActivity)
+                val contactInfo = contactHelper.getContactInfo(it)
                 contactInfo?.let {
                     val phoneNumberCnt = it.phoneNumbers.size
                     if (phoneNumberCnt > 0) {
@@ -217,8 +215,8 @@ class GenerateCodeActivity : AppCompatActivity() {
                 actvEmailAddr.setText("")
                 (actvEmailAddr as MaterialAutoCompleteTextView).setSimpleItems(emptyArray())
                 // 读取新数据并赋值
-                val contactUtils = ContactUtils(this@GenerateCodeActivity)
-                val contactInfo = contactUtils.getContactInfo(it)
+                val contactHelper = ContactHelper(this@GenerateCodeActivity)
+                val contactInfo = contactHelper.getContactInfo(it)
                 contactInfo?.let {
                     val emailCnt = it.emails.size
                     if (emailCnt > 0) {
@@ -699,41 +697,24 @@ class GenerateCodeActivity : AppCompatActivity() {
             }
         }
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-            // 定位
-            PermissionX.init(this)
-                .permissions(LocationUtils.PERMISSION)
-                .explainReasonBeforeRequest()
-                .onExplainRequestReason { scope, deniedList ->
-                    scope.showRequestReasonDialog(
-                        deniedList,
-                        "定位必须使用以下权限",
-                        "好的",
-                        "取消"
-                    )
-                }
-                .onForwardToSettings { scope: ForwardScope, deniedList: MutableList<String> ->
-                    scope.showForwardToSettingsDialog(
-                        deniedList,
-                        "授权请求被永久拒绝\n您需要去应用程序设置中手动开启权限",
-                        "跳转到设置",
-                        "取消"
-                    )
-                }
-                .request { allGranted, grantedList, deniedList ->
-                    if (!allGranted) {
-                        showErrorToast("授权请求被拒绝")
-                        return@request
-                    }
+            PermissionHelper.requestPermissions(
+                this,
+                PermissionHelper.PermissionConfig(
+                    permissions = listOf(LocationHelper.PERMISSION),
+                    explainReasonTitle = "定位必须使用以下权限"
+                ),
+                onGranted = {
                     dlgCoordBd?.run {
                         tilCoordLongitude.helperText = "定位中"
-                        val locationUtils = LocationUtils(this@GenerateCodeActivity)
-                        locationUtils.getLocationInfo {
+                        val locationHelper = LocationHelper(this@GenerateCodeActivity)
+                        locationHelper.getLocationInfo {
                             tilCoordLongitude.helperText = "定位成功"
                             tietCoordLatitude.setText(it.latitude.toString())
                             tietCoordLongitude.setText(it.longitude.toString())
                         }
                     }
                 }
+            )
         }
     }
 
@@ -746,32 +727,14 @@ class GenerateCodeActivity : AppCompatActivity() {
         } else {
             android.Manifest.permission.WRITE_EXTERNAL_STORAGE
         }
-        PermissionX.init(this)
-            .permissions(permission)
-            .explainReasonBeforeRequest()
-            .onExplainRequestReason { scope, deniedList ->
-                scope.showRequestReasonDialog(
-                    deniedList,
-                    "保存条码图片必须使用以下权限",
-                    "好的",
-                    "取消"
-                )
-            }
-            .onForwardToSettings { scope: ForwardScope, deniedList: MutableList<String> ->
-                scope.showForwardToSettingsDialog(
-                    deniedList,
-                    "授权请求被永久拒绝\n您需要去应用程序设置中手动开启权限",
-                    "跳转到设置",
-                    "取消"
-                )
-            }
-            .request { allGranted, grantedList, deniedList ->
-                if (!allGranted) {
-                    showErrorToast("授权请求被拒绝")
-                    return@request
-                }
-                writeCodePicFile()
-            }
+        PermissionHelper.requestPermissions(
+            this,
+            PermissionHelper.PermissionConfig(
+                permissions = listOf(permission),
+                explainReasonTitle = "保存条码图片必须使用以下权限"
+            ),
+            onGranted = { writeCodePicFile() }
+        )
     }
 
     /**
@@ -780,30 +743,13 @@ class GenerateCodeActivity : AppCompatActivity() {
      * 详情见 enum class TaskType
      */
     private fun execContactTask(type: TaskType) {
-        PermissionX.init(this)
-            .permissions(ContactUtils.PERMISSION)
-            .explainReasonBeforeRequest()
-            .onExplainRequestReason { scope, deniedList ->
-                scope.showRequestReasonDialog(
-                    deniedList,
-                    "联系人相关操作必须使用以下权限",
-                    "好的",
-                    "取消"
-                )
-            }
-            .onForwardToSettings { scope: ForwardScope, deniedList: MutableList<String> ->
-                scope.showForwardToSettingsDialog(
-                    deniedList,
-                    "授权请求被永久拒绝\n您需要去应用程序设置中手动开启权限",
-                    "跳转到设置",
-                    "取消"
-                )
-            }
-            .request { allGranted, grantedList, deniedList ->
-                if (!allGranted) {
-                    showErrorToast("授权请求被拒绝")
-                    return@request
-                }
+        PermissionHelper.requestPermissions(
+            this,
+            PermissionHelper.PermissionConfig(
+                permissions = listOf(ContactHelper.PERMISSION),
+                explainReasonTitle = "联系人相关操作必须使用以下权限"
+            ),
+            onGranted = {
                 when (type) {
                     TaskType.CONTACT -> contactLau.launch(null)
                     TaskType.PHONE -> phoneLau.launch(null)
@@ -811,47 +757,31 @@ class GenerateCodeActivity : AppCompatActivity() {
                     TaskType.EMAIL -> emailLau.launch(null)
                 }
             }
+        )
     }
 
     /**
      * 申请位置权限，扫描周围热点
      */
     private fun scanWifi() {
-        PermissionX.init(this)
-            .permissions(WifiUtils.PERMISSION)
-            .explainReasonBeforeRequest()
-            .onExplainRequestReason { scope, deniedList ->
-                scope.showRequestReasonDialog(
-                    deniedList,
-                    "扫描热点必须使用以下权限",
-                    "好的",
-                    "取消"
-                )
-            }
-            .onForwardToSettings { scope: ForwardScope, deniedList: MutableList<String> ->
-                scope.showForwardToSettingsDialog(
-                    deniedList,
-                    "授权请求被永久拒绝\n您需要去应用程序设置中手动开启权限",
-                    "跳转到设置",
-                    "取消"
-                )
-            }
-            .request { allGranted, grantedList, deniedList ->
-                if (!allGranted) {
-                    showErrorToast("授权请求被拒绝")
-                    return@request
-                }
-                val wifiUtils = WifiUtils(this@GenerateCodeActivity)
-                val ssidMap = wifiUtils.scanWifiAndGetInfo()
-                if (ssidMap.isEmpty()) {
-                    return@request
-                }
-                dlgWifiBd?.run {
-                    val ssids = ssidMap.keys.toTypedArray()
-                    (actvWifiSsid as MaterialAutoCompleteTextView).setSimpleItems(ssids)
-                    tilWifiSsid.helperText = "搜索到 ${ssids.size} 个热点，请手动选择"
+        PermissionHelper.requestPermissions(
+            this,
+            PermissionHelper.PermissionConfig(
+                permissions = listOf(WifiHelper.PERMISSION),
+                explainReasonTitle = "扫描热点必须使用以下权限"
+            ),
+            onGranted = {
+                val wifiHelper = WifiHelper(this@GenerateCodeActivity)
+                val ssidMap = wifiHelper.scanWifiAndGetInfo()
+                if (ssidMap.isNotEmpty()) {
+                    dlgWifiBd?.run {
+                        val ssids = ssidMap.keys.toTypedArray()
+                        (actvWifiSsid as MaterialAutoCompleteTextView).setSimpleItems(ssids)
+                        tilWifiSsid.helperText = "搜索到 ${ssids.size} 个热点，请手动选择"
+                    }
                 }
             }
+        )
     }
 
     override fun onResume() {

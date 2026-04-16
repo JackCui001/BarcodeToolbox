@@ -25,13 +25,13 @@ import com.permissionx.guolindev.PermissionX
 
 typealias WlanInfo = MutableMap<String, String>
 
-class WifiUtils(context: Context) {
+class WifiHelper(context: Context) {
     private val wifiManager =
         context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
     private val mContext = context
 
     companion object {
-        const val TAG = "WifiUtils"
+        const val TAG = "WifiHelper"
         const val PERMISSION = android.Manifest.permission.ACCESS_FINE_LOCATION
         var ssid = ""
     }
@@ -198,7 +198,7 @@ class WifiUtils(context: Context) {
             WifiNetworkSuggestion.Builder().setSsid(ssid).setWpa2Passphrase(password).build()
         val suggestions = arrayListOf(suggestion)
 //        suggestions.add(...)
-        WifiUtils.ssid = ssid
+        WifiHelper.ssid = ssid
 
         // Create intent
         val bundle = Bundle()

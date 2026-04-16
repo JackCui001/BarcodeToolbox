@@ -7,7 +7,7 @@ import android.provider.ContactsContract
 import androidx.core.database.getStringOrNull
 import com.permissionx.guolindev.PermissionX
 
-class ContactUtils(context: Context) {
+class ContactHelper(context: Context) {
     data class ContactInfo(
         var name: String = "",
         var phoneNumbers: MutableSet<String> = mutableSetOf(),
@@ -19,7 +19,7 @@ class ContactUtils(context: Context) {
     )
 
     companion object {
-        const val TAG = "ContactUtils"
+        const val TAG = "ContactHelper"
         const val PERMISSION = android.Manifest.permission.READ_CONTACTS
     }
 
