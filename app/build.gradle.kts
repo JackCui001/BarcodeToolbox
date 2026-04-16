@@ -1,0 +1,68 @@
+plugins {
+    id("com.android.application")
+}
+
+android {
+    namespace = "com.jackcui.barcodetoolbox"
+    compileSdk = 37
+    buildToolsVersion = "37.0.0"
+    ndkVersion = "29.0.14206865"
+
+    defaultConfig {
+        applicationId = "com.jackcui.barcodetoolbox"
+        minSdk = 19
+        targetSdk = 37
+        versionCode = 2604161
+        versionName = "1.4.0"
+        multiDexEnabled = true
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+
+    buildFeatures {
+        viewBinding = true
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+}
+
+kotlin {
+    compilerOptions {
+        languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3
+        apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
+    }
+}
+
+dependencies {
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("com.huawei.hms:scanplus:2.12.0.301")    // 兼容Android 4.x的最新版本，无法再升级
+    implementation("androidx.appcompat:appcompat:1.6.1")    // 兼容Android 4.x的最新版本，无法再升级
+    implementation("com.google.android.material:material:1.12.0")   // 兼容Android 4.x的最新版本，无法再升级
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")  // 兼容Android 4.x的最新版本，无法再升级
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
+    implementation("androidx.multidex:multidex:2.0.1")
+    implementation("com.nambimobile.widgets:expandable-fab:1.2.1")
+    implementation("androidx.preference:preference-ktx:1.2.1")
+//    implementation("com.github.getActivity:XXPermissions:18.65")
+    implementation("com.guolindev.permissionx:permissionx:1.8.1")
+    implementation("com.github.getActivity:Toaster:15.0")
+    implementation("com.alibaba.fastjson2:fastjson2:2.0.46.android4")   // 兼容Android 4.x的最新版本，无法再升级
+//    implementation("com.github.knightwood:material3-preference:1.4")
+//    implementation("org.jetbrains.kotlin:kotlin-reflect:2.0.0-RC1")
+}
