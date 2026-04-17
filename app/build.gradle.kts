@@ -11,7 +11,7 @@ android {
     defaultConfig {
         applicationId = "com.jackcui.barcodetoolbox"
         minSdk = 19
-        targetSdk = 37
+        targetSdk = 34
         versionCode = 2604161
         versionName = "1.4.0"
         multiDexEnabled = true
