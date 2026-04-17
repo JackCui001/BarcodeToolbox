@@ -25,6 +25,7 @@ object LocaleHelper {
     }
 
     private fun updateResources(context: Context, locale: Locale): Context {
+        Locale.setDefault(locale)
         val configuration = Configuration(context.resources.configuration)
         configuration.setLocale(locale)
         return context.createConfigurationContext(configuration)

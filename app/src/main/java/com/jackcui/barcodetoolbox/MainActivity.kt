@@ -2,7 +2,6 @@ package com.jackcui.barcodetoolbox
 
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -17,6 +16,7 @@ import android.widget.ScrollView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.graphics.toColorInt
 import androidx.core.text.set
 import androidx.preference.PreferenceManager
 import com.alibaba.fastjson2.JSON
@@ -497,7 +497,7 @@ class MainActivity : AppCompatActivity() {
         val end = this.length + str.length
         this.append(str)
         colorHex?.let {
-            this[start, end] = ForegroundColorSpan(Color.parseColor(colorHex))
+            this[start, end] = ForegroundColorSpan(colorHex.toColorInt())
         }
         relativeFontSize?.let {
             this[start, end] = RelativeSizeSpan(it.toFloat())

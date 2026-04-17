@@ -48,7 +48,7 @@ kotlin {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.core:core-ktx:1.13.1") // 兼容Android 4.x的最新版本，无法再升级
     implementation("com.huawei.hms:scanplus:2.12.0.301")    // 兼容Android 4.x的最新版本，无法再升级
     implementation("androidx.appcompat:appcompat:1.6.1")    // 兼容Android 4.x的最新版本，无法再升级
     implementation("com.google.android.material:material:1.12.0")   // 兼容Android 4.x的最新版本，无法再升级
