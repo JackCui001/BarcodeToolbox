@@ -1,0 +1,248 @@
+<resources>
+    <string name="app_name">條碼工具箱</string>
+    <string name="title_activity_settings">設置</string>
+    <string name="introduction">歡迎使用 「條碼工具箱」 應用！\n本應用不僅提供了各類碼的掃描識別功能，還提供了構建功能。\n支持外部應用導入圖片掃描，在外部應用選擇打開或分享圖片並選擇此應用即可。\n掃描碼內容的同時可以解析提取各類有效信息，而不必糾結於原始字符串的含義。\n構建功能仍處於 Beta 階段，有問題可以隨時和開發者反饋。\n下列功能支持一圖多碼掃描：\n圖片文件掃描，拍照掃描\n\n開發者：酷安@威尼斯的向日葵</string>
+
+    <!-- UI Labels -->
+    <string name="label_clear">清屏</string>
+    <string name="label_scan">掃碼</string>
+    <string name="label_generate">構建碼</string>
+    <string name="label_history">歷史記錄</string>
+    <string name="label_save">保存</string>
+    <string name="label_query">查詢</string>
+    <string name="label_delete_record">刪除記錄</string>
+    <string name="label_convert_special">轉換特殊信息</string>
+    <string name="label_preview">生成預覽</string>
+
+    <!-- Hints -->
+    <string name="hint_code_type">碼類型</string>
+    <string name="hint_content">內容</string>
+    <string name="hint_wifi_ssid">熱點名稱 (SSID)</string>
+    <string name="hint_wifi_password">密碼</string>
+    <string name="hint_wifi_cipher">加密方式</string>
+    <string name="hint_wifi_hidden">隱藏網絡</string>
+    <string name="hint_sms_phone">收件號碼</string>
+    <string name="hint_phone_number">號碼</string>
+    <string name="hint_history_date">日期</string>
+    <string name="hint_history_index">索引</string>
+    <string name="hint_email_addr">收件郵箱</string>
+    <string name="hint_email_subject">主題</string>
+    <string name="hint_latitude">緯度</string>
+    <string name="hint_longitude">經度</string>
+    <string name="hint_name">姓名</string>
+    <string name="hint_mobile">手機</string>
+    <string name="hint_office">單位</string>
+    <string name="hint_home">住宅</string>
+    <string name="hint_address">地址</string>
+    <string name="hint_email">郵箱</string>
+    <string name="hint_website">網站</string>
+    <string name="hint_company">工作單位</string>
+    <string name="hint_job_title">職稱</string>
+    <string name="label_phone">電話</string>
+    <string name="label_other_info">其他信息</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_title_help">幫助</string>
+    <string name="dialog_title_history">歷史記錄</string>
+    <string name="dialog_title_filter">篩選</string>
+    <string name="dialog_title_scan_mode">掃碼方式</string>
+    <string name="dialog_title_delete_confirm">刪除記錄</string>
+    <string name="dialog_title_select_type">請選擇一種信息類型</string>
+    <string name="dialog_title_wifi">Wi-Fi</string>
+    <string name="dialog_title_email">E-mail</string>
+    <string name="dialog_title_phone">電話號碼</string>
+    <string name="dialog_title_sms">短信</string>
+    <string name="dialog_title_contact">聯繫人</string>
+    <string name="dialog_title_coord">坐標</string>
+
+    <!-- Buttons -->
+    <string name="btn_confirm">確認</string>
+    <string name="btn_cancel">取消</string>
+    <string name="btn_ok">確定</string>
+    <string name="btn_good">好的</string>
+    <string name="btn_goto_settings">跳轉到設置</string>
+    <string name="btn_search_nearby">搜索附近熱點</string>
+    <string name="btn_import_contact">導入聯繫人</string>
+    <string name="btn_location">定位</string>
+
+    <!-- Toasts / Messages -->
+    <string name="toast_clear_success">輸出信息已清空</string>
+    <string name="toast_error_file_type">導入了錯誤的文件類型</string>
+    <string name="toast_error_option_incomplete">選項不完整</string>
+    <string name="toast_error_read_image_failed">圖片讀取失敗</string>
+    <string name="toast_error_no_result">無結果</string>
+    <string name="toast_error_data_failed">數據獲取失敗</string>
+    <string name="toast_error_record_not_found">未找到對應記錄</string>
+    <string name="toast_error_invalid_index">記錄索引無效</string>
+    <string name="toast_error_permission_denied">授權請求被拒絕</string>
+    <string name="toast_error_no_email_app">未檢測到郵箱應用</string>
+    <string name="toast_error_no_map_app">未檢測到地圖應用</string>
+    <string name="toast_error_no_hotspot">未在附近掃描到此熱點</string>
+    <string name="toast_info_convert_success">特殊信息轉換完成</string>
+    <string name="toast_info_preview_success">生成預覽成功，長按圖片以保存</string>
+    <string name="toast_info_save_success">圖片已保存至：%1$s</string>
+    <string name="toast_error_save_failed">發生異常，圖片保存失敗</string>
+    <string name="toast_error_no_code_type">未選擇碼類型，無法生成瀏覽</string>
+    <string name="toast_error_over_limit">超出字節數限制，無法生成預覽</string>
+    <string name="toast_error_empty_content">文本內容為空，無法生成瀏覽</string>
+    <string name="toast_error_exception">發生異常，請仔細檢查輸入內容是否滿足特定碼要求</string>
+    <string name="toast_error_need_preview">請先生成預覽</string>
+    <string name="toast_error_at_least_one">至少需要輸入一項信息</string>
+    <string name="toast_error_location_service">請打開定位服務</string>
+    <string name="toast_error_wifi_enabled">請先打開WLAN功能</string>
+    <string name="error_field_required_ssid">SSID不能為空</string>
+    <string name="error_field_required_pwd">密碼不能為空</string>
+    <string name="error_field_required_cipher">加密方式不能為空</string>
+    <string name="error_field_required_email">收件電邮不能為空</string>
+    <string name="error_field_required_subject">主題不能為空</string>
+    <string name="error_field_required_content">內容不能為空</string>
+    <string name="error_field_required_phone">電話號碼不能為空</string>
+    <string name="error_field_required_longitude">經度不能為空</string>
+    <string name="error_field_required_latitude">緯度不能為空</string>
+
+    <string name="perm_forward_to_settings">授權請求被永久拒絕\n您需要去應用程序設置中手动開啟權限</string>
+    <string name="scan_result_multi_pic">檢測到多圖，數量：%1$d</string>
+    <string name="scan_result_multi_code">檢測到多碼，數量：%1$d</string>
+    <string name="scan_result_history_date">第 %1$d 次識別</string>
+    <string name="scan_result_history_pic">圖 %1$d</string>
+    <string name="scan_result_history_code">碼 %1$d</string>
+
+    <!-- Helper Texts -->
+    <string name="helper_wifi_no_pwd">當前加密方式無需密碼</string>
+    <string name="helper_import_count">已導入 %1$d 個號碼，請手動選擇</string>
+    <string name="helper_import_email_count">已導入 %1$d 個郵箱，請手動選擇</string>
+    <string name="helper_import_website_count">已導入 %1$d 個網站，請手動選擇</string>
+    <string name="helper_import_addr_count">已導入 %1$d 個地址，請手動選擇</string>
+    <string name="helper_import_email_addr_count">已導入 %1$d 個郵箱地址，請手動選擇</string>
+    <string name="helper_locating">定位中</string>
+    <string name="helper_location_success">定位成功</string>
+    <string name="helper_search_wifi_count">搜索到 %1$d 個熱點，請手動選擇</string>
+
+    <!-- Permissions -->
+    <string name="perm_loc_hotspot">掃描熱點必須使用以下權限</string>
+    <string name="perm_loc_coord">定位必須使用以下權限</string>
+    <string name="perm_save_pic">保存條碼圖片必須使用以下權限</string>
+    <string name="perm_contact">聯繫人相關操作必須使用以下權限</string>
+    <string name="perm_scan">掃碼必須使用以下權限</string>
+    <string name="perm_wifi_hotspot">連接熱點必須使用以下權限</string>
+
+    <!-- Others -->
+    <string name="wait_for_scan">等待識別</string>
+    <string name="select_map_app">選擇一個地圖應用以查看坐標位置</string>
+    <string name="unit_byte_available">剩餘可用字節：%1$s</string>
+    <string name="invoked_by_intent_view">【由外部應用打開文件調用】</string>
+    <string name="invoked_by_intent_send">【由外部應用分享文件調用】</string>
+    <string name="scan_mode_desc_custom_view">彈出取景框實時掃描，最主流的掃碼方式，與微信、支付寶相同，只支持單碼</string>
+    <string name="scan_mode_desc_bitmap">進入相機拍照介面，按下拍照按鈕後才對照片進行掃描，支持多碼</string>
+    <string name="scan_mode_desc_multi">進入文件管理器，選擇圖片文件掃描，可批量選擇圖片，支持多碼</string>
+    <string name="wifi_no_password">開放</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="scan_type_wx">微信碼</string>
+    <string name="scan_type_multi">多功能碼</string>
+
+    <!-- Preferences -->
+    <string name="pref_cat_general">通用</string>
+    <string name="pref_title_language">語言</string>
+    <string name="pref_language_follow_system">跟隨系統</string>
+    <string name="pref_cat_scan">掃碼</string>
+    <string name="pref_title_default_scan_mode">默認掃碼方式</string>
+    <string name="pref_title_parse">碼值解析</string>
+    <string name="pref_summary_parse_on">輸出解析後數據</string>
+    <string name="pref_summary_parse_off">輸出原始字符串</string>
+    <string name="pref_title_auto_save">自動保存掃碼結果</string>
+    <string name="pref_summary_auto_save_on">將會自動保存掃碼結果至歷史記錄</string>
+    <string name="pref_summary_auto_save_off">將不會自動保存掃碼結果至歷史記錄</string>
+    <string name="pref_title_scan_prefix">自定義掃描前綴</string>
+    <string name="pref_title_pic_prefix">自定義多圖前綴</string>
+    <string name="pref_title_code_prefix">自定義多碼前綴</string>
+    <string name="pref_cat_generate">構建碼</string>
+    <string name="pref_title_show_code_info">展示碼型說明</string>
+    <string name="pref_summary_show_code_info_on">選定碼型後彈窗展示特定要求</string>
+    <string name="pref_summary_show_code_info_off">選定碼型後不會彈窗展示特定要求</string>
+
+    <string name="msg_delete_confirm">日期：%1$s\n索引：%2$d\n確認要刪除？此操作不可撤消！</string>
+    <string name="msg_delete_success">日期：%1$s\n索引：%2$d\n記錄刪除成功</string>
+    <string name="msg_save_history_success">日期：%1$s\n索引：%2$d\n保存成功</string>
+
+    <string name="toast_info_wifi_connect_success">%1$s - 熱點連接成功</string>
+    <string name="toast_error_wifi_connect_fail">%1$s - 熱點連接失敗</string>
+
+    <!-- ScanResultParser specific -->
+    <string name="label_scan_type_qr">QR 碼</string>
+    <string name="label_scan_type_aztec">AZTEC 碼</string>
+    <string name="label_scan_type_datamatrix">Data Matrix 碼</string>
+    <string name="label_scan_type_pdf417">PDF417 碼</string>
+    <string name="label_scan_type_code93">Code93 碼</string>
+    <string name="label_scan_type_code39">Code39 碼</string>
+    <string name="label_scan_type_code128">Code128 碼</string>
+    <string name="label_scan_type_ean13">EAN13 碼</string>
+    <string name="label_scan_type_ean8">EAN8 碼</string>
+    <string name="label_scan_type_itf14">ITF14 碼</string>
+    <string name="label_scan_type_upc_a">UPC_A 碼</string>
+    <string name="label_scan_type_upc_e">UPC_E 碼</string>
+    <string name="label_scan_type_codabar">Codabar 碼</string>
+
+    <string name="label_form_product">產品信息：</string>
+    <string name="label_form_contact">聯繫人：</string>
+    <string name="label_form_driver">駕照信息：</string>
+    <string name="label_form_email">Email：</string>
+    <string name="label_form_event">日曆事件：</string>
+    <string name="label_form_isbn">ISBN 號：</string>
+    <string name="label_form_location">坐標：</string>
+    <string name="label_form_text">文本：</string>
+    <string name="label_form_sms">短信：</string>
+    <string name="label_form_phone">電話號碼：</string>
+    <string name="label_form_url">URL 鏈接：</string>
+    <string name="label_form_wifi">Wi-Fi 信息：</string>
+    <string name="label_form_unknown">未知類型信息：</string>
+
+    <string name="label_tel_cell">手機：</string>
+    <string name="label_tel_home">住家：</string>
+    <string name="label_tel_work">辦公：</string>
+    <string name="label_tel_fax">傳真：</string>
+    <string name="label_tel_other">其他：</string>
+
+    <string name="label_email_home">住家：</string>
+    <string name="label_email_work">辦公：</string>
+    <string name="label_email_other">其他：</string>
+
+    <string name="label_pos_home">住家：</string>
+    <string name="label_pos_work">辦公：</string>
+    <string name="label_pos_other">其他：</string>
+
+    <string name="label_driver_family_name">姓：</string>
+    <string name="label_driver_middle_name">中間名：</string>
+    <string name="label_driver_given_name">名：</string>
+    <string name="label_driver_sex">性別：</string>
+    <string name="label_driver_birth">出生日期：</string>
+    <string name="label_driver_country">駕照發放國：</string>
+    <string name="label_driver_type">駕照類型：</string>
+    <string name="label_driver_num">駕照號碼：</string>
+    <string name="label_driver_issue">發證日期：</string>
+    <string name="label_driver_expire">過期日期：</string>
+    <string name="label_driver_province">省/州：</string>
+    <string name="label_driver_city">城市：</string>
+    <string name="label_driver_avenue">街道：</string>
+    <string name="label_driver_zip">郵政編碼：</string>
+
+    <string name="label_event_desc">描述：</string>
+    <string name="label_event_summary">摘要：</string>
+    <string name="label_event_start">開始時間：</string>
+    <string name="label_event_end">結束時間：</string>
+    <string name="label_event_organizer">組織者：</string>
+    <string name="label_event_place">地點：</string>
+    <string name="label_event_status">狀態：</string>
+
+    <string name="label_wifi_ssid">接入點名稱：</string>
+    <string name="label_wifi_pwd">密碼：</string>
+    <string name="label_wifi_cipher">加密方式：</string>
+    <string name="label_wifi_hidden_status">隱藏：</string>
+
+    <string name="action_add_contact">新建聯繫人</string>
+    <string name="action_send_email">發送郵件</string>
+    <string name="action_open_map">打開地圖並定位</string>
+    <string name="action_send_sms">發送短信</string>
+    <string name="action_dial">撥打電話</string>
+    <string name="action_connect_wifi">連接熱點</string>
+</resources>

@@ -1,0 +1,47 @@
+<resources>
+    <string-array name="code">
+        <item>QR</item>
+        <item>Aztec</item>
+        <item>PDF417</item>
+        <item>DataMatrix</item>
+        <item>UPC-A</item>
+        <item>UPC-E</item>
+        <item>ITF14</item>
+        <item>EAN-8</item>
+        <item>EAN-13</item>
+        <item>Code39</item>
+        <item>Code93</item>
+        <item>Code128</item>
+        <item>Codabar</item>
+    </string-array>
+
+    <string-array name="cipher">
+        <item>WPA/WPA2</item>
+        <item>WPA3</item>
+        <item>WEP</item>
+        <item>無</item>
+    </string-array>
+
+    <string-array name="hints">
+        <item>"最長支持2953個UTF-8編碼字節。\n\n支持中文，1個中文字佔用3個字節，如果內容過長會導致碼複雜，影響識別。"</item>
+        <item>"最長支持2953個UTF-8編碼字節。\n\n支持中文，1個中文字佔用3個字節，如果內容過长會導致碼複雜，影響識別。"</item>
+        <item>"最長支持1777個UTF-8編碼字節。\n\n支持中文，1個中文字佔用3個字節，如果內容過長會導致碼複雜，影響識別。"</item>
+        <item>"最長支持2335個UTF-8編碼字節。\n\n只支持英文，如果內容過長會導致碼複雜，影響識別。"</item>
+        <item>"支持11位數字輸入。\n\n只支持數字，生成包含12位數字的碼圖，包含最後一位校驗數字。"</item>
+        <item>"支持7位數字輸入。\n\n只支持數字，首位需要是0或1，生成包含8位數字的碼圖，包含最後一位校驗數字。"</item>
+        <item>"支持80位以內數字輸入，並且需要是偶數位。\n\n只支持數字，生成包含偶數位數字的碼圖，如果內容過長會導致碼複雜，影響識別。"</item>
+        <item>"支持7位數字輸入。\n\n只支持數字，生成包含8位數字的碼圖，包含最後一位校驗數字。"</item>
+        <item>"支持12位數字輸入。\n\n只支持數字，首位不可以是0，生成包含13位數字的碼圖，包含最後一位校驗數字。首位如果不是0則生成UPC-A碼。"</item>
+        <item>"最長支持80字節長度。\n\n字符集可以是數字、大寫字母和- . \$ / + % SPACE英文格式符號。"</item>
+        <item>"最長支持80字節長度。\n\n字符集可以是數字、大写字母和- . \$ / + % * SPACE英文格式符號。"</item>
+        <item>"最長支持80字節長度。\n\n字符集是編碼表中的字符集。"</item>
+        <item>"最長支持2953個UTF-8編碼字節。\n\n開頭如果是ABCDTN*E字符，結尾也要是相應字符，如果不是上述字符，則默認添加A到碼值的開頭和結尾。其他字符可以是數字和- . \$ / : +英文格式符號。"</item>
+    </string-array>
+
+    <string-array name="scan_mode_entries">
+        <item>每次詢問</item>
+        <item>普通掃碼</item>
+        <item>拍照掃碼</item>
+        <item>圖片文件掃碼</item>
+    </string-array>
+</resources>

@@ -33,7 +33,7 @@ class LocationHelper(context: Context) {
     @SuppressLint("MissingPermission")
     fun getLocationInfo(callback: (Location) -> Unit) {
         if (!isLocationServiceEnabled()) {
-            showErrorToast("请打开定位服务")
+            showErrorToast(appContext.getString(R.string.toast_error_location_service))
             return
         }
 

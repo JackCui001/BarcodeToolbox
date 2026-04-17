@@ -89,9 +89,6 @@ class MainActivity : AppCompatActivity() {
         const val HW_SCAN_REQ_CODE = 0
         const val WIFI_INTENT_REQ_CODE = 1
         const val TAG = "BarcodeToolbox"
-        const val WAIT_FOR_SCAN = "等待识别"
-        const val INVOKED_BY_INTENT_VIEW = "【由外部应用打开文件调用】"
-        const val INVOKED_BY_INTENT_SEND = "【由外部应用分享文件调用】"
         const val SCAN_MODE_ASK = "ask"
         const val SCAN_MODE_NORMAL = "normal"
         const val SCAN_MODE_CAMERA = "camera"
@@ -123,6 +120,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(LocaleHelper.applyLocale(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // ViewBinding
@@ -136,7 +137,11 @@ class MainActivity : AppCompatActivity() {
         readSettings()
 
         // Init str
-        bd.tvOutput.text = SpannableStringBuilder().appendMySpan(WAIT_FOR_SCAN, "#7400FF", null)
+        bd.tvOutput.text = SpannableStringBuilder().appendMySpan(
+            getString(R.string.wait_for_scan),
+            "#7400FF",
+            null
+        )
         bd.extendedFabAction.hide()
 
         // Get intent, action and MIME type
@@ -147,20 +152,20 @@ class MainActivity : AppCompatActivity() {
 
         type?.let {
             if (!it.startsWith("image/")) {
-                showErrorToast("导入了错误的文件类型")
+                showErrorToast(getString(R.string.toast_error_file_type))
             } else if (action == Intent.ACTION_SEND) {
                 bd.tvOutput.text = SpannableStringBuilder().appendMySpan(
-                    "$INVOKED_BY_INTENT_SEND\n", "#FF4400", 1.1
+                    "${getString(R.string.invoked_by_intent_send)}\n", "#FF4400", 1.1
                 )
                 handleSendImage(intent) // Handle single image being sent
             } else if (action == Intent.ACTION_SEND_MULTIPLE) {
                 bd.tvOutput.text = SpannableStringBuilder().appendMySpan(
-                    "$INVOKED_BY_INTENT_SEND\n", "#FF4400", 1.1
+                    "${getString(R.string.invoked_by_intent_send)}\n", "#FF4400", 1.1
                 )
                 handleSendMultipleImages(intent) // Handle multiple images being sent
             } else if (action == Intent.ACTION_VIEW) {
                 bd.tvOutput.text = SpannableStringBuilder().appendMySpan(
-                    "$INVOKED_BY_INTENT_VIEW\n", "#FF4400", 1.1
+                    "${getString(R.string.invoked_by_intent_view)}\n", "#FF4400", 1.1
                 )
                 handleViewImage(intent) // Handle single image being viewed
             }
@@ -169,7 +174,7 @@ class MainActivity : AppCompatActivity() {
         bd.topAppBar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.item_help -> {
-                    MaterialAlertDialogBuilder(this).setTitle("帮助")
+                    MaterialAlertDialogBuilder(this).setTitle(getString(R.string.dialog_title_help))
                         .setMessage(R.string.introduction).show()
                     true
                 }
@@ -194,8 +199,12 @@ class MainActivity : AppCompatActivity() {
 
         bd.fabClear.setOnClickListener {
             Log.d(TAG, "tvOutput Cleared")
-            showInfoToast("输出信息已清空")
-            bd.tvOutput.text = SpannableStringBuilder().appendMySpan(WAIT_FOR_SCAN, "#7400FF", null)
+            showInfoToast(getString(R.string.toast_clear_success))
+            bd.tvOutput.text = SpannableStringBuilder().appendMySpan(
+                getString(R.string.wait_for_scan),
+                "#7400FF",
+                null
+            )
             scanCnt = 1
             bd.extendedFabAction.hide()
         }
@@ -214,61 +223,61 @@ class MainActivity : AppCompatActivity() {
         }
 
         bd.fabHistory.setOnClickListener {
-            val items = arrayOf("保存", "查询")
-            MaterialAlertDialogBuilder(this).setTitle("历史记录").setItems(
-                items
-            ) { _, which ->
-                when (which) {
-                    0 -> saveData()
-                    1 -> {
-                        val jsonStr = loadData()
-                        val history =
-                            JSON.parseObject(jsonStr, object : TypeReference<History>() {})
-                        if (history.isNullOrEmpty()) {
-                            showErrorToast("未找到历史记录，请先进行保存")
-                            return@setItems
-                        }
-                        val keys = mutableListOf<String>()
-                        val valueIndexes = mutableListOf<MutableList<String>>()
-                        history.forEach { pair ->
-                            keys.add(pair.key)
-                            valueIndexes.add(MutableList(pair.value.size) { it.toString() })
-                        }
-                        val historyPickerBinding =
-                            DialogHistoryPickerBinding.inflate(layoutInflater)
-                        (historyPickerBinding.actvHistoryDate as MaterialAutoCompleteTextView).setSimpleItems(
-                            keys.toTypedArray()
-                        )
-                        var key = ""
-                        var listIndex = -1
-                        historyPickerBinding.actvHistoryDate.setOnItemClickListener { _, _, position, _ ->
-                            (historyPickerBinding.actvHistoryIndex as MaterialAutoCompleteTextView).setSimpleItems(
-                                valueIndexes[position].toTypedArray()
+            val items = arrayOf(getString(R.string.label_save), getString(R.string.label_query))
+            MaterialAlertDialogBuilder(this).setTitle(getString(R.string.dialog_title_history))
+                .setItems(items) { _, which ->
+                    when (which) {
+                        0 -> saveData()
+                        1 -> {
+                            val jsonStr = loadData()
+                            val history =
+                                JSON.parseObject(jsonStr, object : TypeReference<History>() {})
+                            if (history.isNullOrEmpty()) {
+                                showErrorToast(getString(R.string.toast_error_record_not_found))
+                                return@setItems
+                            }
+                            val keys = mutableListOf<String>()
+                            val valueIndexes = mutableListOf<MutableList<String>>()
+                            history.forEach { pair ->
+                                keys.add(pair.key)
+                                valueIndexes.add(MutableList(pair.value.size) { it.toString() })
+                            }
+                            val historyPickerBinding =
+                                DialogHistoryPickerBinding.inflate(layoutInflater)
+                            (historyPickerBinding.actvHistoryDate as MaterialAutoCompleteTextView).setSimpleItems(
+                                keys.toTypedArray()
                             )
-                            key = keys[position]
-                        }
-                        historyPickerBinding.actvHistoryIndex.setOnItemClickListener { _, _, position, _ ->
-                            listIndex = position
-                        }
-                        MaterialAlertDialogBuilder(this).setView(historyPickerBinding.root)
-                            .setTitle("筛选").setPositiveButton("确认") { _, _ ->
-                                if (historyPickerBinding.actvHistoryDate.text.isEmpty() || historyPickerBinding.actvHistoryIndex.text.isEmpty()) {
-                                    showErrorToast("选项不完整")
-                                    return@setPositiveButton
-                                }
-                                // 创建意图对象
-                                val itt = Intent(this, HistoryActivity::class.java)
-                                // 设置传递键值对
+                            var key = ""
+                            var listIndex = -1
+                            historyPickerBinding.actvHistoryDate.setOnItemClickListener { _, _, position, _ ->
+                                (historyPickerBinding.actvHistoryIndex as MaterialAutoCompleteTextView).setSimpleItems(
+                                    valueIndexes[position].toTypedArray()
+                                )
+                                key = keys[position]
+                            }
+                            historyPickerBinding.actvHistoryIndex.setOnItemClickListener { _, _, position, _ ->
+                                listIndex = position
+                            }
+                            MaterialAlertDialogBuilder(this).setView(historyPickerBinding.root)
+                                .setTitle(getString(R.string.dialog_title_filter))
+                                .setPositiveButton(getString(R.string.btn_confirm)) { _, _ ->
+                                    if (historyPickerBinding.actvHistoryDate.text.isEmpty() || historyPickerBinding.actvHistoryIndex.text.isEmpty()) {
+                                        showErrorToast(getString(R.string.toast_error_option_incomplete))
+                                        return@setPositiveButton
+                                    }
+                                    // 创建意图对象
+                                    val itt = Intent(this, HistoryActivity::class.java)
+                                    // 设置传递键值对
 //                                itt.putExtra("history_map_json", jsonStr)
-                                itt.putExtra("history_map", history as Serializable)
-                                itt.putExtra("key", key)
-                                itt.putExtra("list_index", listIndex)
-                                // 激活意图
-                                startActivity(itt)
-                            }.show()
+                                    itt.putExtra("history_map", history as Serializable)
+                                    itt.putExtra("key", key)
+                                    itt.putExtra("list_index", listIndex)
+                                    // 激活意图
+                                    startActivity(itt)
+                                }.show()
+                        }
                     }
-                }
-            }.show()
+                }.show()
         }
     }
 
@@ -292,22 +301,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showScanModeDialog() {
-        val items = arrayOf("普通扫码", "拍照扫码", "图片文件扫码")
+        val items = resources.getStringArray(R.array.scan_mode_entries).drop(1).toTypedArray()
         var choice = -1
-        MaterialAlertDialogBuilder(this).setTitle("扫码方式")
+        MaterialAlertDialogBuilder(this).setTitle(getString(R.string.dialog_title_scan_mode))
             .setSingleChoiceItems(items, -1) { _, which ->
                 choice = which
                 val text = StringBuilder("${items[which]}：")
                 text.append(
                     when (which) {
-                        0 -> "弹出取景框实时扫描，最主流的扫码方式，与微信、支付宝相同，只支持单码"
-                        1 -> "进入相机拍照界面，按下拍照按钮后才对照片进行扫描，支持多码"
-                        2 -> "进入文件管理器，选择图片文件扫描，可批量选择图片，支持多码"
+                        0 -> getString(R.string.scan_mode_desc_custom_view)
+                        1 -> getString(R.string.scan_mode_desc_bitmap)
+                        2 -> getString(R.string.scan_mode_desc_multi)
                         else -> ""
                     }
                 )
                 showInfoToast(text.toString())
-            }.setPositiveButton("确定") { _, _ ->
+            }.setPositiveButton(getString(R.string.btn_ok)) { _, _ ->
                 when (choice) {
                     0 -> reqPermAndScan(true)
                     1 -> reqPermAndScan(false)
@@ -362,7 +371,13 @@ class MainActivity : AppCompatActivity() {
         history[dateAsKey] = strListAsValue
         val newJsonStr = JSON.toJSONString(history)
         file.writeText(newJsonStr)
-        showInfoToast("日期：$dateAsKey\n索引：${strListAsValue.size - 1}\n保存成功")
+        showInfoToast(
+            getString(
+                R.string.msg_save_history_success,
+                dateAsKey,
+                strListAsValue.size - 1
+            )
+        )
     }
 
     private fun loadData(): String {
@@ -380,7 +395,7 @@ class MainActivity : AppCompatActivity() {
             MediaStore.Images.Media.getBitmap(contentResolver, uri)
         } catch (e: Exception) {
             e.printStackTrace()
-            showErrorToast("图片读取失败")
+            showErrorToast(getString(R.string.toast_error_read_image_failed))
             return
         }
         val frame = HmsScanFrame(img)
@@ -410,11 +425,14 @@ class MainActivity : AppCompatActivity() {
     ) {
         val codeAmt = results.size
         val newText = SpannableStringBuilder()
-        if (bd.tvOutput.text.toString() != WAIT_FOR_SCAN) {
+        if (bd.tvOutput.text.toString() != getString(R.string.wait_for_scan)) {
             newText.append(bd.tvOutput.text)
         }
         if (multiPicAmt == -1 || multiPicIdx == 0) {
-            var prefix = "---------- 第 $scanCnt 次识别 ----------"
+            var prefix = "---------- " + getString(
+                R.string.scan_result_history_date,
+                scanCnt
+            ) + " ----------"
             if (!multiScanPrefix.isNullOrEmpty()) {
                 val strSplit = multiScanPrefix!!.split("{n}")
                 prefix = "${strSplit[0]}$scanCnt${strSplit[1]}"
@@ -423,10 +441,17 @@ class MainActivity : AppCompatActivity() {
             scanCnt++
         }
         if (multiPicIdx == 0) {
-            newText.appendMySpan("检测到多图，数量：$multiPicAmt\n", "#1565C0", 0.8)
+            newText.appendMySpan(
+                getString(R.string.scan_result_multi_pic, multiPicAmt) + "\n",
+                "#1565C0",
+                0.8
+            )
         }
         if (multiPicIdx != -1) {
-            var prefix = "---------- 图 ${multiPicIdx + 1} ----------"
+            var prefix = "---------- " + getString(
+                R.string.scan_result_history_pic,
+                multiPicIdx + 1
+            ) + " ----------"
             if (!multiPicPrefix.isNullOrEmpty()) {
                 val strSplit = multiPicPrefix!!.split("{n}")
                 prefix = "${strSplit[0]}${multiPicIdx + 1}${strSplit[1]}"
@@ -434,15 +459,22 @@ class MainActivity : AppCompatActivity() {
             newText.appendMySpan("$prefix\n", "#1565C0", 0.8)
         }
         if (emptyRes) {
-            newText.appendLine("无结果")
+            newText.appendLine(getString(R.string.toast_error_no_result))
         } else {
             if (codeAmt > 1) {
-                newText.appendMySpan("检测到多码，数量：$codeAmt\n", "#F57C00", 0.8)
+                newText.appendMySpan(
+                    getString(R.string.scan_result_multi_code, codeAmt) + "\n",
+                    "#F57C00",
+                    0.8
+                )
                 for (i in 0 until codeAmt) {
-                    var prefix = "---------- 码 ${i + 1} ----------"
+                    var prefix = "---------- " + getString(
+                        R.string.scan_result_history_code,
+                        i + 1
+                    ) + " ----------"
                     if (!multiCodePrefix.isNullOrEmpty()) {
                         val strSplit = multiCodePrefix!!.split("{n}")
-                        prefix = "${strSplit[0]}${multiPicIdx + 1}${strSplit[1]}"
+                        prefix = "${strSplit[0]}${i + 1}${strSplit[1]}"
                     }
                     newText.appendMySpan("$prefix\n", "#F57C00", 0.8)
                     newText.append(concatCodeInfo(results[i]))
@@ -492,7 +524,7 @@ class MainActivity : AppCompatActivity() {
             this,
             PermissionHelper.PermissionConfig(
                 permissions = permissions,
-                explainReasonTitle = "扫码必须使用以下权限"
+                explainReasonTitle = getString(R.string.perm_scan)
             ),
             onGranted = {
                 if (hwScan) {
@@ -521,7 +553,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     private val scanResultParser = ScanResultParser { desc, text, iconRes, listener ->
         bd.extendedFabAction.contentDescription = desc
         bd.extendedFabAction.text = text
@@ -531,7 +562,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun concatCodeInfo(res: HmsScan): String {
-        return scanResultParser.parse(res)
+        return scanResultParser.parse(this, res)
     }
 
     /**
@@ -557,9 +588,9 @@ class MainActivity : AppCompatActivity() {
             // 使用Intent连接Wifi的回调
             WIFI_INTENT_REQ_CODE -> {
                 if (resultCode != RESULT_OK) {
-                    showErrorToast("$ssid - 热点添加失败")
+                    showErrorToast(getString(R.string.toast_error_wifi_connect_fail, ssid))
                 } else {
-                    showInfoToast("$ssid - 热点添加成功")
+                    showInfoToast(getString(R.string.toast_info_wifi_connect_success, ssid))
                 }
             }
         }

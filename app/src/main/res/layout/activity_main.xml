@@ -66,7 +66,7 @@
             app:fab_icon="@drawable/outline_delete_sweep_24"
             app:fab_orientation="portrait"
             app:label_hiddenToVisibleAnimationDurationMs="100"
-            app:label_text="清屏"
+            app:label_text="@string/label_clear"
             app:maxImageSize="22dp" />
 
         <com.nambimobile.widgets.efab.FabOption
@@ -76,7 +76,7 @@
             app:fab_color="?attr/colorEfab"
             app:fab_icon="@drawable/outline_qr_code_scanner_24"
             app:label_hiddenToVisibleAnimationDurationMs="100"
-            app:label_text="扫码"
+            app:label_text="@string/label_scan"
             app:maxImageSize="22dp" />
 
         <com.nambimobile.widgets.efab.FabOption
@@ -86,7 +86,7 @@
             app:fab_color="?attr/colorEfab"
             app:fab_icon="@drawable/outline_add_to_photos_24"
             app:label_hiddenToVisibleAnimationDurationMs="100"
-            app:label_text="构建码"
+            app:label_text="@string/label_generate"
             app:maxImageSize="22dp" />
 
         <com.nambimobile.widgets.efab.FabOption
@@ -96,7 +96,7 @@
             app:fab_color="?attr/colorEfab"
             app:fab_icon="@drawable/outline_history_24"
             app:label_hiddenToVisibleAnimationDurationMs="100"
-            app:label_text="历史记录"
+            app:label_text="@string/label_history"
             app:maxImageSize="22dp" />
 
     </com.nambimobile.widgets.efab.ExpandableFabLayout>

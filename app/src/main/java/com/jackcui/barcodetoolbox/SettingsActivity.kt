@@ -1,5 +1,6 @@
 package com.jackcui.barcodetoolbox
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.EditTextPreference
@@ -7,6 +8,10 @@ import androidx.preference.PreferenceFragmentCompat
 import com.jackcui.barcodetoolbox.MainActivity.Companion.showErrorToast
 
 class SettingsActivity : AppCompatActivity() {
+
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(LocaleHelper.applyLocale(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,7 +24,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {
-        
+
         private fun validatePrefixPreference(key: String, errorMessage: String): Boolean {
             val preference: EditTextPreference? = findPreference(key)
             preference?.setOnPreferenceChangeListener { _, newValue ->
@@ -49,6 +54,19 @@ class SettingsActivity : AppCompatActivity() {
                 "multi_code_prefix",
                 "输入值无效，必须包含 {n} 用以指示当前码个数"
             )
+
+            findPreference<androidx.preference.ListPreference>("language")?.setOnPreferenceChangeListener { _, _ ->
+                restartApp()
+                true
+            }
+        }
+
+        private fun restartApp() {
+            val intent =
+                activity?.packageManager?.getLaunchIntentForPackage(activity?.packageName ?: "")
+            intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            activity?.startActivity(intent ?: Intent(activity, MainActivity::class.java))
+            activity?.finishAffinity()
         }
     }
 }

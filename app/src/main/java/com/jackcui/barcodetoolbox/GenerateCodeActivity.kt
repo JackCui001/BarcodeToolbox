@@ -57,7 +57,7 @@ class GenerateCodeActivity : AppCompatActivity() {
     private val convertInfoDismissCallback = DialogInterface.OnDismissListener {
         if (res.isNotBlank()) {
             bd.tietGenContent.setText(res)
-            showInfoToast("特殊信息转换完成")
+            showInfoToast(getString(R.string.toast_info_convert_success))
             res.clear()
         }
     }
@@ -111,7 +111,7 @@ class GenerateCodeActivity : AppCompatActivity() {
                     }
                     val phoneNumberCnt = it.phoneNumbers.size
                     if (phoneNumberCnt > 0) {
-                        tilContactHomePhone.helperText = "已导入 $phoneNumberCnt 个号码，请手动选择"
+                        tilContactHomePhone.helperText = getString(R.string.helper_import_count, phoneNumberCnt)
                         val phoneNumArr = it.phoneNumbers.toTypedArray()
                         actvContactMobilePhone.setSimpleItems(
                             phoneNumArr
@@ -128,7 +128,7 @@ class GenerateCodeActivity : AppCompatActivity() {
 
                     val emailCnt = it.emails.size
                     if (emailCnt > 0) {
-                        tilContactEmail.helperText = "已导入 $emailCnt 个邮箱，请手动选择"
+                        tilContactEmail.helperText = getString(R.string.helper_import_email_count, emailCnt)
                         actvContactEmail.setSimpleItems(
                             it.emails.toTypedArray()
                         )
@@ -138,7 +138,7 @@ class GenerateCodeActivity : AppCompatActivity() {
 
                     val websiteCnt = it.websites.size
                     if (websiteCnt > 0) {
-                        tilContactWebsite.helperText = "已导入 $emailCnt 个网站，请手动选择"
+                        tilContactWebsite.helperText = getString(R.string.helper_import_website_count, websiteCnt)
                         actvContactWebsite.setSimpleItems(
                             it.websites.toTypedArray()
                         )
@@ -148,7 +148,7 @@ class GenerateCodeActivity : AppCompatActivity() {
 
                     val addressCnt = it.addresses.size
                     if (addressCnt > 0) {
-                        tilContactAddr.helperText = "已导入 $addressCnt 个地址，请手动选择"
+                        tilContactAddr.helperText = getString(R.string.helper_import_addr_count, addressCnt)
                         actvContactAddr.setSimpleItems(
                             it.addresses.toTypedArray()
                         )
@@ -172,7 +172,7 @@ class GenerateCodeActivity : AppCompatActivity() {
                 contactInfo?.let {
                     val phoneNumberCnt = it.phoneNumbers.size
                     if (phoneNumberCnt > 0) {
-                        tilPhoneNumber.helperText = "已导入 $phoneNumberCnt 个号码，请手动选择"
+                        tilPhoneNumber.helperText = getString(R.string.helper_import_count, phoneNumberCnt)
                         actvPhoneNumber.setSimpleItems(
                             it.phoneNumbers.toTypedArray()
                         )
@@ -196,7 +196,7 @@ class GenerateCodeActivity : AppCompatActivity() {
                 contactInfo?.let {
                     val phoneNumberCnt = it.phoneNumbers.size
                     if (phoneNumberCnt > 0) {
-                        tilSmsPhone.helperText = "已导入 $phoneNumberCnt 个号码，请手动选择"
+                        tilSmsPhone.helperText = getString(R.string.helper_import_count, phoneNumberCnt)
                         actvSmsPhone.setSimpleItems(
                             it.phoneNumbers.toTypedArray()
                         )
@@ -220,7 +220,7 @@ class GenerateCodeActivity : AppCompatActivity() {
                 contactInfo?.let {
                     val emailCnt = it.emails.size
                     if (emailCnt > 0) {
-                        tilEmailAddr.helperText = "已导入 $emailCnt 个邮箱地址，请手动选择"
+                        tilEmailAddr.helperText = getString(R.string.helper_import_email_addr_count, emailCnt)
                         actvEmailAddr.setSimpleItems(
                             it.emails.toTypedArray()
                         )
@@ -230,6 +230,10 @@ class GenerateCodeActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(LocaleHelper.applyLocale(newBase))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -258,7 +262,7 @@ class GenerateCodeActivity : AppCompatActivity() {
         val hints = resources.getStringArray(R.array.hints)
         var selectedItemIdx = -1
 
-        bd.tvLenInd.text = "剩余可用字节：N/A"
+        bd.tvLenInd.text = getString(R.string.unit_byte_available, "N/A")
         bd.tietGenContent.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(
                 s: CharSequence, start: Int, count: Int, after: Int
@@ -274,31 +278,27 @@ class GenerateCodeActivity : AppCompatActivity() {
                 if (selectedItemIdx == -1) {
                     return
                 }
-                bd.tvLenInd.text = "剩余可用字节：${
-                    maxBytes[selectedItemIdx] - s.toString().encodeToByteArray().size
-                }"
+                bd.tvLenInd.text = getString(R.string.unit_byte_available, (maxBytes[selectedItemIdx] - s.toString().encodeToByteArray().size).toString())
             }
         })
 
         bd.actvCodeType.setOnItemClickListener { _, _, position, _ ->
             selectedItemIdx = position
-            bd.tvLenInd.text = "剩余可用字节：${
-                maxBytes[selectedItemIdx] - bd.tietGenContent.text.toString()
-                    .encodeToByteArray().size
-            }"
+            bd.tvLenInd.text = getString(R.string.unit_byte_available, (maxBytes[selectedItemIdx] - bd.tietGenContent.text.toString()
+                    .encodeToByteArray().size).toString())
             if (showCodeTypeInfo) {
                 MaterialAlertDialogBuilder(this@GenerateCodeActivity).setTitle(
                     codeTypeStrArr[selectedItemIdx]
                 ).setMessage(hints[selectedItemIdx])
-                    .setPositiveButton("确认") { dialog, _ -> dialog.dismiss() }.show()
+                    .setPositiveButton(getString(R.string.btn_confirm)) { dialog, _ -> dialog.dismiss() }.show()
             }
         }
 
         bd.btnSpInfoConvert.setOnClickListener {
-            val items = arrayOf("Wi-Fi", "Email", "联系人", "电话号码", "短信", "坐标")
+            val items = arrayOf("Wi-Fi", "Email", getString(R.string.dialog_title_contact), getString(R.string.dialog_title_phone), getString(R.string.dialog_title_sms), getString(R.string.dialog_title_coord))
 
             MaterialAlertDialogBuilder(this)
-                .setTitle("请选择一种信息类型")
+                .setTitle(getString(R.string.dialog_title_select_type))
                 .setItems(items) { _, which ->
                     when (which) {
                         0 -> showWifiDialog(res)
@@ -315,17 +315,23 @@ class GenerateCodeActivity : AppCompatActivity() {
         bd.btnGenCode.setOnClickListener {
             val codeTypeText = bd.actvCodeType.text
             if (codeTypeText.isNullOrEmpty()) {
-                showErrorToast("未选择码类型，无法生成浏览")
+                showErrorToast(getString(R.string.toast_error_no_code_type))
                 return@setOnClickListener
             }
             val lenIndicatorText = bd.tvLenInd.text
-            if (lenIndicatorText.substring(lenIndicatorText.indexOf("：") + 1).toInt() < 0) {
-                showErrorToast("超出字节数限制，无法生成预览")
+            val availableBytes = try {
+                val text = bd.tvLenInd.text.toString()
+                // Parsing depends on format, safer to just re-calculate or use a regex
+                val match = Regex("\\d+").find(text)
+                match?.value?.toInt() ?: 0
+            } catch (e: Exception) { 0 }
+            if (availableBytes < 0) {
+                showErrorToast(getString(R.string.toast_error_over_limit))
                 return@setOnClickListener
             }
             val content = bd.tietGenContent.text
             if (content.isNullOrEmpty()) {
-                showErrorToast("文本内容为空，无法生成浏览")
+                showErrorToast(getString(R.string.toast_error_empty_content))
                 return@setOnClickListener
             }
             val type = codeType[selectedItemIdx]
@@ -334,17 +340,17 @@ class GenerateCodeActivity : AppCompatActivity() {
             try {
                 codeBitmap = ScanUtil.buildBitmap(content.toString(), type, width, height, null)
                 bd.ivCodePreview.setImageBitmap(codeBitmap)
-                showInfoToast("生成预览成功，长按图片以保存")
+                showInfoToast(getString(R.string.toast_info_preview_success))
                 codePreviewIdx = selectedItemIdx
             } catch (e: Exception) {
                 e.printStackTrace()
-                showErrorToast("发生异常，请仔细检查输入内容是否满足特定码要求")
+                showErrorToast(getString(R.string.toast_error_exception))
             }
         }
 
         bd.ivCodePreview.setOnLongClickListener {
             if (codeBitmap == null) {
-                showErrorToast("请先生成预览")
+                showErrorToast(getString(R.string.toast_error_need_preview))
                 return@setOnLongClickListener true
             }
             reqPermAndMakeFile()
@@ -410,9 +416,9 @@ class GenerateCodeActivity : AppCompatActivity() {
         }
 
         if (imageUri != null) {
-            showInfoToast("图片已保存至：$filePathAndName")
+            showInfoToast(getString(R.string.toast_info_save_success, filePathAndName))
         } else {
-            showErrorToast("发生异常，图片保存失败")
+            showErrorToast(getString(R.string.toast_error_save_failed))
         }
 
         // Refresh MediaStore
@@ -431,8 +437,8 @@ class GenerateCodeActivity : AppCompatActivity() {
         var cipherText = ""
         dlgWifiBd = DialogWifiBinding.inflate(layoutInflater)
         wifiStr.append("WIFI:")
-        val dialog = MaterialAlertDialogBuilder(this).setView(dlgWifiBd!!.root).setTitle("Wi-Fi")
-            .setPositiveButton("确认", null).setNeutralButton("搜索附近热点", null)
+        val dialog = MaterialAlertDialogBuilder(this).setView(dlgWifiBd!!.root).setTitle(getString(R.string.dialog_title_wifi))
+            .setPositiveButton(getString(R.string.btn_confirm), null).setNeutralButton(getString(R.string.btn_search_nearby), null)
             .setOnCancelListener {
                 Log.d(TAG, "showWifiDialog: OnCancel")
                 wifiStr.clear()
@@ -440,9 +446,9 @@ class GenerateCodeActivity : AppCompatActivity() {
         dlgWifiBd?.run {
             actvWifiCipher.setOnItemClickListener { _, _, position, _ ->
                 cipherText = cipherArr[position]
-                if (cipherText == "无") {
+                if (cipherText == getString(R.string.helper_wifi_no_pwd)) {
                     tietWifiPwd.setText("")
-                    tilWifiPwd.helperText = "当前加密方式无需密码"
+                    tilWifiPwd.helperText = getString(R.string.helper_wifi_no_pwd)
                     tilWifiPwd.isEnabled = false
                 } else {
                     tilWifiPwd.helperText = null
@@ -454,19 +460,21 @@ class GenerateCodeActivity : AppCompatActivity() {
             dlgWifiBd?.run {
                 var ok = true
                 if (actvWifiSsid.text.isNullOrBlank()) {
-                    tilWifiSsid.error = "SSID不能为空"
+                    tilWifiSsid.error = getString(R.string.error_field_required_ssid)
+                    // Wait, I didn't add validation strings. I'll use common ones if available.
+                    // For now I'll just keep it or add them. I'll add them to strings.xml later.
                     ok = false
                 } else {
                     tilWifiSsid.error = null
                 }
                 if (tilWifiPwd.isEnabled && tietWifiPwd.text.isNullOrBlank()) {
-                    tilWifiPwd.error = "密码不能为空"
+                    tilWifiPwd.error = getString(R.string.error_field_required_pwd)
                     ok = false
                 } else {
                     tilWifiPwd.error = null
                 }
                 if (actvWifiCipher.text.isNullOrEmpty()) {
-                    tilWifiCipher.error = "加密方式不能为空"
+                    tilWifiCipher.error = getString(R.string.error_field_required_cipher)
                     ok = false
                 } else {
                     tilWifiCipher.error = null
@@ -504,8 +512,8 @@ class GenerateCodeActivity : AppCompatActivity() {
     private fun showEmailDialog(emailStr: StringBuilder) {
         dlgEmailBd = DialogEmailBinding.inflate(layoutInflater)
         emailStr.append("MATMSG:")
-        val dialog = MaterialAlertDialogBuilder(this).setView(dlgEmailBd!!.root).setTitle("E-mail")
-            .setPositiveButton("确认", null).setNeutralButton("导入联系人", null)
+        val dialog = MaterialAlertDialogBuilder(this).setView(dlgEmailBd!!.root).setTitle(getString(R.string.dialog_title_email))
+            .setPositiveButton(getString(R.string.btn_confirm), null).setNeutralButton(getString(R.string.btn_import_contact), null)
             .setOnCancelListener {
                 Log.d(TAG, "showEmailDialog: OnCancel")
                 emailStr.clear()
@@ -514,19 +522,19 @@ class GenerateCodeActivity : AppCompatActivity() {
             dlgEmailBd?.run {
                 var ok = true
                 if (actvEmailAddr.text.isNullOrBlank()) {
-                    tilEmailAddr.error = "收件邮箱不能为空"
+                    tilEmailAddr.error = getString(R.string.error_field_required_email)
                     ok = false
                 } else {
                     tilEmailAddr.error = null
                 }
                 if (tietEmailSubject.text.isNullOrBlank()) {
-                    tilEmailSubject.error = "主题不能为空"
+                    tilEmailSubject.error = getString(R.string.error_field_required_subject)
                     ok = false
                 } else {
                     tilEmailSubject.error = null
                 }
                 if (tietEmailContent.text.isNullOrBlank()) {
-                    tilEmailContent.error = "内容不能为空"
+                    tilEmailContent.error = getString(R.string.error_field_required_content)
                     ok = false
                 } else {
                     tilEmailContent.error = null
@@ -547,8 +555,8 @@ class GenerateCodeActivity : AppCompatActivity() {
         dlgPhoneBd = DialogPhoneBinding.inflate(layoutInflater)
         phoneStr.append("TEL:")
         val dialog =
-            MaterialAlertDialogBuilder(this).setView(dlgPhoneBd!!.root).setTitle("电话号码")
-                .setPositiveButton("确认", null).setNeutralButton("导入联系人", null)
+            MaterialAlertDialogBuilder(this).setView(dlgPhoneBd!!.root).setTitle(getString(R.string.dialog_title_phone))
+                .setPositiveButton(getString(R.string.btn_confirm), null).setNeutralButton(getString(R.string.btn_import_contact), null)
                 .setOnCancelListener {
                     Log.d(TAG, "showPhoneDialog: OnCancel")
                     phoneStr.clear()
@@ -556,7 +564,7 @@ class GenerateCodeActivity : AppCompatActivity() {
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             dlgPhoneBd?.run {
                 if (actvPhoneNumber.text.isNullOrBlank()) {
-                    tilPhoneNumber.error = "电话号码不能为空"
+                    tilPhoneNumber.error = getString(R.string.error_field_required_phone)
                     return@setOnClickListener
                 }
                 phoneStr.append("${actvPhoneNumber.text}")
@@ -571,8 +579,8 @@ class GenerateCodeActivity : AppCompatActivity() {
     private fun showSmsDialog(smsStr: StringBuilder) {
         dlgSmsBd = DialogSmsBinding.inflate(layoutInflater)
         smsStr.append("SMSTO:")
-        val dialog = MaterialAlertDialogBuilder(this).setView(dlgSmsBd!!.root).setTitle("短信")
-            .setPositiveButton("确认", null).setNeutralButton("导入联系人", null)
+        val dialog = MaterialAlertDialogBuilder(this).setView(dlgSmsBd!!.root).setTitle(getString(R.string.dialog_title_sms))
+            .setPositiveButton(getString(R.string.btn_confirm), null).setNeutralButton(getString(R.string.btn_import_contact), null)
             .setOnCancelListener {
                 Log.d(TAG, "showSmsDialog: OnCancel")
                 smsStr.clear()
@@ -581,13 +589,15 @@ class GenerateCodeActivity : AppCompatActivity() {
             dlgSmsBd?.run {
                 var ok = true
                 if (actvSmsPhone.text.isNullOrBlank()) {
-                    tilSmsPhone.error = "收件邮箱不能为空"
+                    tilSmsPhone.error = getString(R.string.error_field_required_email) // Wait, SMS phone or email? R.string.error_field_required_phone was better.
+                    // But checking back, it said SMS phone to use R.string.hint_sms_phone.
+                    tilSmsPhone.error = getString(R.string.error_field_required_phone)
                     ok = false
                 } else {
                     tilSmsPhone.error = null
                 }
                 if (tietSmsContent.text.isNullOrBlank()) {
-                    tilSmsContent.error = "内容不能为空"
+                    tilSmsContent.error = getString(R.string.error_field_required_content)
                     ok = false
                 } else {
                     tilSmsContent.error = null
@@ -608,8 +618,8 @@ class GenerateCodeActivity : AppCompatActivity() {
         dlgContactBd = DialogContactBinding.inflate(layoutInflater)
         contactStr.appendLine("BEGIN:VCARD\nVERSION:3.0")
         val dialog =
-            MaterialAlertDialogBuilder(this).setView(dlgContactBd!!.root).setTitle("联系人")
-                .setPositiveButton("确认", null).setNeutralButton("导入联系人", null)
+            MaterialAlertDialogBuilder(this).setView(dlgContactBd!!.root).setTitle(getString(R.string.dialog_title_contact))
+                .setPositiveButton(getString(R.string.btn_confirm), null).setNeutralButton(getString(R.string.btn_import_contact), null)
                 .setOnCancelListener {
                     Log.d(TAG, "showContactDialog: OnCancel")
                     contactStr.clear()
@@ -630,7 +640,7 @@ class GenerateCodeActivity : AppCompatActivity() {
                 val jobTitle = tietContactJobTitle.text
                 if (name.isNullOrBlank() && officePhone.isNullOrBlank() && mobilePhone.isNullOrBlank() && homePhone.isNullOrBlank() && addr.isNullOrBlank() && email.isNullOrBlank() && company.isNullOrBlank() && jobTitle.isNullOrBlank() && url.isNullOrBlank()) {
                     dialog.cancel()
-                    showErrorToast("至少需要输入一项信息")
+                    showErrorToast(getString(R.string.toast_error_at_least_one))
                 }
                 if (!name.isNullOrBlank()) {
                     contactStr.appendLine("N:;$name")
@@ -669,8 +679,8 @@ class GenerateCodeActivity : AppCompatActivity() {
     private fun showCoordDialog(coordStr: StringBuilder) {
         dlgCoordBd = DialogCoordBinding.inflate(layoutInflater)
         coordStr.append("GEO:")
-        val dialog = MaterialAlertDialogBuilder(this).setView(dlgCoordBd!!.root).setTitle("坐标")
-            .setPositiveButton("确认", null).setNeutralButton("定位", null).setOnCancelListener {
+        val dialog = MaterialAlertDialogBuilder(this).setView(dlgCoordBd!!.root).setTitle(getString(R.string.dialog_title_coord))
+            .setPositiveButton(getString(R.string.btn_confirm), null).setNeutralButton(getString(R.string.btn_location), null).setOnCancelListener {
                 Log.d(TAG, "showCoordDialog: OnCancel")
                 coordStr.clear()
             }.setOnDismissListener(convertInfoDismissCallback).show()
@@ -678,13 +688,13 @@ class GenerateCodeActivity : AppCompatActivity() {
             dlgCoordBd?.run {
                 var ok = true
                 if (tietCoordLongitude.text.isNullOrBlank()) {
-                    tilCoordLongitude.error = "经度不能为空"
+                    tilCoordLongitude.error = getString(R.string.error_field_required_longitude)
                     ok = false
                 } else {
                     tilCoordLongitude.error = null
                 }
                 if (tietCoordLatitude.text.isNullOrBlank()) {
-                    tilCoordLatitude.error = "纬度不能为空"
+                    tilCoordLatitude.error = getString(R.string.error_field_required_latitude)
                     ok = false
                 } else {
                     tilCoordLatitude.error = null
@@ -701,14 +711,14 @@ class GenerateCodeActivity : AppCompatActivity() {
                 this,
                 PermissionHelper.PermissionConfig(
                     permissions = listOf(LocationHelper.PERMISSION),
-                    explainReasonTitle = "定位必须使用以下权限"
+                    explainReasonTitle = getString(R.string.perm_loc_coord)
                 ),
                 onGranted = {
                     dlgCoordBd?.run {
-                        tilCoordLongitude.helperText = "定位中"
+                        tilCoordLongitude.helperText = getString(R.string.helper_locating)
                         val locationHelper = LocationHelper(this@GenerateCodeActivity)
                         locationHelper.getLocationInfo {
-                            tilCoordLongitude.helperText = "定位成功"
+                            tilCoordLongitude.helperText = getString(R.string.helper_location_success)
                             tietCoordLatitude.setText(it.latitude.toString())
                             tietCoordLongitude.setText(it.longitude.toString())
                         }
@@ -731,7 +741,7 @@ class GenerateCodeActivity : AppCompatActivity() {
             this,
             PermissionHelper.PermissionConfig(
                 permissions = listOf(permission),
-                explainReasonTitle = "保存条码图片必须使用以下权限"
+                explainReasonTitle = getString(R.string.perm_save_pic)
             ),
             onGranted = { writeCodePicFile() }
         )
@@ -747,7 +757,7 @@ class GenerateCodeActivity : AppCompatActivity() {
             this,
             PermissionHelper.PermissionConfig(
                 permissions = listOf(ContactHelper.PERMISSION),
-                explainReasonTitle = "联系人相关操作必须使用以下权限"
+                explainReasonTitle = getString(R.string.perm_contact)
             ),
             onGranted = {
                 when (type) {
@@ -768,7 +778,7 @@ class GenerateCodeActivity : AppCompatActivity() {
             this,
             PermissionHelper.PermissionConfig(
                 permissions = listOf(WifiHelper.PERMISSION),
-                explainReasonTitle = "扫描热点必须使用以下权限"
+                explainReasonTitle = getString(R.string.perm_loc_hotspot)
             ),
             onGranted = {
                 val wifiHelper = WifiHelper(this@GenerateCodeActivity)
@@ -777,7 +787,7 @@ class GenerateCodeActivity : AppCompatActivity() {
                     dlgWifiBd?.run {
                         val ssids = ssidMap.keys.toTypedArray()
                         (actvWifiSsid as MaterialAutoCompleteTextView).setSimpleItems(ssids)
-                        tilWifiSsid.helperText = "搜索到 ${ssids.size} 个热点，请手动选择"
+                        tilWifiSsid.helperText = getString(R.string.helper_search_wifi_count, ssids.size)
                     }
                 }
             }

@@ -76,7 +76,7 @@ class WifiHelper(context: Context) {
             // Android 10
             if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
                 if (scanResult == null) {
-                    showErrorToast("未在附近扫描到此热点")
+                    showErrorToast(mContext.getString(R.string.toast_error_no_hotspot))
                     return
                 }
                 connectByP2P(ssid, password)
@@ -87,14 +87,14 @@ class WifiHelper(context: Context) {
         // Android 10-
         else {
             if (scanResult == null) {
-                showErrorToast("未在附近扫描到此热点")
+                showErrorToast(mContext.getString(R.string.toast_error_no_hotspot))
                 return
             }
             val bSuccess = connectByConfig(ssid, password, getCipherType(scanResult.capabilities))
             if (bSuccess) {
-                showInfoToast("$ssid - 热点连接成功")
+                showInfoToast(mContext.getString(R.string.toast_info_wifi_connect_success, ssid))
             } else {
-                showErrorToast("$ssid - 热点连接失败")
+                showErrorToast(mContext.getString(R.string.toast_error_wifi_connect_fail, ssid))
             }
         }
     }
@@ -102,7 +102,7 @@ class WifiHelper(context: Context) {
     private fun enableWifi(): Boolean {
         if (!wifiManager.isWifiEnabled) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                showErrorToast("请先打开WLAN功能")
+                showErrorToast(mContext.getString(R.string.toast_error_wifi_enabled))
                 val it = Intent(android.provider.Settings.ACTION_WIFI_SETTINGS)
                 it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 mContext.applicationContext.startActivity(it)
@@ -151,11 +151,11 @@ class WifiHelper(context: Context) {
             mContext.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
-                showInfoToast("$ssid - 热点连接成功")
+                showInfoToast(mContext.getString(R.string.toast_info_wifi_connect_success, ssid))
             }
 
             override fun onUnavailable() {
-                showErrorToast("$ssid - 热点连接失败")
+                showErrorToast(mContext.getString(R.string.toast_error_wifi_connect_fail, ssid))
             }
         }
         connectivityManager.requestNetwork(request, networkCallback)

@@ -21,62 +21,62 @@ class ScanResultParser(
     private val onSetFabAction: (String, String, Int, View.OnClickListener) -> Unit
 ) {
 
-    fun parse(res: HmsScan): String {
+    fun parse(context: android.content.Context, res: HmsScan): String {
         val scanType = res.scanType
         val scanTypeForm = res.scanTypeForm
         val newText = StringBuilder()
 
-        appendScanType(scanType, newText)
-        appendScanFormContent(scanTypeForm, res, newText)
+        appendScanType(context, scanType, newText)
+        appendScanFormContent(context, scanTypeForm, res, newText)
 
         return newText.toString()
     }
 
-    private fun appendScanType(scanType: Int, newText: StringBuilder) {
+    private fun appendScanType(context: android.content.Context, scanType: Int, newText: StringBuilder) {
         when (scanType) {
-            HmsScan.QRCODE_SCAN_TYPE -> newText.append("QR 码 - ")
-            HmsScan.AZTEC_SCAN_TYPE -> newText.append("AZTEC 码 - ")
-            HmsScan.DATAMATRIX_SCAN_TYPE -> newText.append("Data Matrix 码 - ")
-            HmsScan.PDF417_SCAN_TYPE -> newText.append("PDF417 码 - ")
-            HmsScan.CODE93_SCAN_TYPE -> newText.append("Code93 码 - ")
-            HmsScan.CODE39_SCAN_TYPE -> newText.append("Code39 码 - ")
-            HmsScan.CODE128_SCAN_TYPE -> newText.append("Code128 码 - ")
-            HmsScan.EAN13_SCAN_TYPE -> newText.append("EAN13 码 - ")
-            HmsScan.EAN8_SCAN_TYPE -> newText.append("EAN8 码 - ")
-            HmsScan.ITF14_SCAN_TYPE -> newText.append("ITF14 码 - ")
-            HmsScan.UPCCODE_A_SCAN_TYPE -> newText.append("UPC_A 码 - ")
-            HmsScan.UPCCODE_E_SCAN_TYPE -> newText.append("UPC_E 码 - ")
-            HmsScan.CODABAR_SCAN_TYPE -> newText.append("Codabar 码 - ")
-            HmsScan.WX_SCAN_TYPE -> newText.append("微信码")
-            HmsScan.MULTI_FUNCTIONAL_SCAN_TYPE -> newText.append("多功能码")
+            HmsScan.QRCODE_SCAN_TYPE -> newText.append(context.getString(R.string.label_scan_type_qr) + " - ")
+            HmsScan.AZTEC_SCAN_TYPE -> newText.append(context.getString(R.string.label_scan_type_aztec) + " - ")
+            HmsScan.DATAMATRIX_SCAN_TYPE -> newText.append(context.getString(R.string.label_scan_type_datamatrix) + " - ")
+            HmsScan.PDF417_SCAN_TYPE -> newText.append(context.getString(R.string.label_scan_type_pdf417) + " - ")
+            HmsScan.CODE93_SCAN_TYPE -> newText.append(context.getString(R.string.label_scan_type_code93) + " - ")
+            HmsScan.CODE39_SCAN_TYPE -> newText.append(context.getString(R.string.label_scan_type_code39) + " - ")
+            HmsScan.CODE128_SCAN_TYPE -> newText.append(context.getString(R.string.label_scan_type_code128) + " - ")
+            HmsScan.EAN13_SCAN_TYPE -> newText.append(context.getString(R.string.label_scan_type_ean13) + " - ")
+            HmsScan.EAN8_SCAN_TYPE -> newText.append(context.getString(R.string.label_scan_type_ean8) + " - ")
+            HmsScan.ITF14_SCAN_TYPE -> newText.append(context.getString(R.string.label_scan_type_itf14) + " - ")
+            HmsScan.UPCCODE_A_SCAN_TYPE -> newText.append(context.getString(R.string.label_scan_type_upc_a) + " - ")
+            HmsScan.UPCCODE_E_SCAN_TYPE -> newText.append(context.getString(R.string.label_scan_type_upc_e) + " - ")
+            HmsScan.CODABAR_SCAN_TYPE -> newText.append(context.getString(R.string.label_scan_type_codabar) + " - ")
+            HmsScan.WX_SCAN_TYPE -> newText.append(context.getString(R.string.scan_type_wx))
+            HmsScan.MULTI_FUNCTIONAL_SCAN_TYPE -> newText.append(context.getString(R.string.scan_type_multi))
         }
     }
 
-    private fun appendScanFormContent(scanTypeForm: Int, res: HmsScan, newText: StringBuilder) {
+    private fun appendScanFormContent(context: android.content.Context, scanTypeForm: Int, res: HmsScan, newText: StringBuilder) {
         when (scanTypeForm) {
-            HmsScan.ARTICLE_NUMBER_FORM -> appendArticleNumber(res, newText)
-            HmsScan.CONTACT_DETAIL_FORM -> appendContactDetail(res, newText)
-            HmsScan.DRIVER_INFO_FORM -> appendDriverInfo(res, newText)
-            HmsScan.EMAIL_CONTENT_FORM -> appendEmailContent(res, newText)
-            HmsScan.EVENT_INFO_FORM -> appendEventInfo(res, newText)
-            HmsScan.ISBN_NUMBER_FORM -> appendIsbnNumber(res, newText)
-            HmsScan.LOCATION_COORDINATE_FORM -> appendLocationCoordinate(res, newText)
-            HmsScan.PURE_TEXT_FORM -> appendPureText(res, newText)
-            HmsScan.SMS_FORM -> appendSmsContent(res, newText)
-            HmsScan.TEL_PHONE_NUMBER_FORM -> appendTelPhoneNumber(res, newText)
-            HmsScan.URL_FORM -> appendUrl(res, newText)
-            HmsScan.WIFI_CONNECT_INFO_FORM -> appendWifiConnectionInfo(res, newText)
-            HmsScan.OTHER_FORM -> appendOtherForm(res, newText)
+            HmsScan.ARTICLE_NUMBER_FORM -> appendArticleNumber(context, res, newText)
+            HmsScan.CONTACT_DETAIL_FORM -> appendContactDetail(context, res, newText)
+            HmsScan.DRIVER_INFO_FORM -> appendDriverInfo(context, res, newText)
+            HmsScan.EMAIL_CONTENT_FORM -> appendEmailContent(context, res, newText)
+            HmsScan.EVENT_INFO_FORM -> appendEventInfo(context, res, newText)
+            HmsScan.ISBN_NUMBER_FORM -> appendIsbnNumber(context, res, newText)
+            HmsScan.LOCATION_COORDINATE_FORM -> appendLocationCoordinate(context, res, newText)
+            HmsScan.PURE_TEXT_FORM -> appendPureText(context, res, newText)
+            HmsScan.SMS_FORM -> appendSmsContent(context, res, newText)
+            HmsScan.TEL_PHONE_NUMBER_FORM -> appendTelPhoneNumber(context, res, newText)
+            HmsScan.URL_FORM -> appendUrl(context, res, newText)
+            HmsScan.WIFI_CONNECT_INFO_FORM -> appendWifiConnectionInfo(context, res, newText)
+            HmsScan.OTHER_FORM -> appendOtherForm(context, res, newText)
         }
     }
 
-    private fun appendArticleNumber(res: HmsScan, newText: StringBuilder) {
-        newText.appendLine("产品信息：")
+    private fun appendArticleNumber(context: android.content.Context, res: HmsScan, newText: StringBuilder) {
+        newText.appendLine(context.getString(R.string.label_form_product))
         newText.appendLine(res.originalValue)
     }
 
-    private fun appendContactDetail(res: HmsScan, newText: StringBuilder) {
-        newText.appendLine("联系人：")
+    private fun appendContactDetail(context: android.content.Context, res: HmsScan, newText: StringBuilder) {
+        newText.appendLine(context.getString(R.string.label_form_contact))
         val tmp = res.contactDetail
         val peopleName = tmp.peopleName
         val tels = tmp.telPhoneNumbers
@@ -89,34 +89,34 @@ class ScanResultParser(
         val data = arrayListOf<ContentValues>()
 
         peopleName?.run {
-            newText.append("姓名： ")
+            newText.append(context.getString(R.string.hint_name) + "： ")
             newText.appendLine(fullName)
         }
         if (!tels.isNullOrEmpty()) {
-            newText.appendLine("电话：")
+            newText.appendLine(context.getString(R.string.label_phone) + "：")
             for (tel in tels) {
                 val row = ContentValues().apply {
                     put(ContactsContract.Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
                 }
                 when (tel.useType) {
                     TelPhoneNumber.CELLPHONE_NUMBER_USE_TYPE -> {
-                        newText.append("  手机： ")
+                        newText.append("  " + context.getString(R.string.label_tel_cell))
                         row.put(Phone.TYPE, Phone.TYPE_MOBILE)
                     }
                     TelPhoneNumber.RESIDENTIAL_USE_TYPE -> {
-                        newText.append("  住家： ")
+                        newText.append("  " + context.getString(R.string.label_tel_home))
                         row.put(Phone.TYPE, Phone.TYPE_HOME)
                     }
                     TelPhoneNumber.OFFICE_USE_TYPE -> {
-                        newText.append("  办公： ")
+                        newText.append("  " + context.getString(R.string.label_tel_work))
                         row.put(Phone.TYPE, Phone.TYPE_WORK)
                     }
                     TelPhoneNumber.FAX_USE_TYPE -> {
-                        newText.append("  传真： ")
+                        newText.append("  " + context.getString(R.string.label_tel_fax))
                         row.put(Phone.TYPE, Phone.TYPE_FAX_WORK)
                     }
                     TelPhoneNumber.OTHER_USE_TYPE -> {
-                        newText.append("  其他： ")
+                        newText.append("  " + context.getString(R.string.label_tel_other))
                         row.put(Phone.TYPE, Phone.TYPE_OTHER)
                     }
                 }
@@ -127,22 +127,22 @@ class ScanResultParser(
             }
         }
         if (!emailContentList.isNullOrEmpty()) {
-            newText.appendLine("邮箱： ")
+            newText.appendLine(context.getString(R.string.hint_email) + "： ")
             for (email in emailContentList) {
                 val row = ContentValues().apply {
                     put(ContactsContract.Data.MIMETYPE, Email.CONTENT_ITEM_TYPE)
                 }
                 when (email.addressType) {
                     EmailContent.RESIDENTIAL_USE_TYPE -> {
-                        newText.append("  住家： ")
+                        newText.append("  " + context.getString(R.string.label_email_home))
                         row.put(Email.TYPE, Email.TYPE_HOME)
                     }
                     EmailContent.OFFICE_USE_TYPE -> {
-                        newText.append("  办公： ")
+                        newText.append("  " + context.getString(R.string.label_email_work))
                         row.put(Email.TYPE, Email.TYPE_WORK)
                     }
                     EmailContent.OTHER_USE_TYPE -> {
-                        newText.append("  其他： ")
+                        newText.append("  " + context.getString(R.string.label_email_other))
                         row.put(Email.TYPE, Email.TYPE_OTHER)
                     }
                 }
@@ -157,30 +157,30 @@ class ScanResultParser(
             newText.appendLine(contactLinks.toList().joinToString())
         }
         if (!company.isNullOrEmpty()) {
-            newText.append("公司： ")
+            newText.append(context.getString(R.string.hint_company) + "： ")
             newText.appendLine(company)
         }
         if (!title.isNullOrEmpty()) {
-            newText.append("职位： ")
+            newText.append(context.getString(R.string.hint_job_title) + "： ")
             newText.appendLine(title)
         }
         if (!addrInfoList.isNullOrEmpty()) {
-            newText.appendLine("地址：")
+            newText.appendLine(context.getString(R.string.hint_address) + "：")
             for (addrInfo in addrInfoList) {
                 val row = ContentValues().apply {
                     put(ContactsContract.Data.MIMETYPE, StructuredPostal.CONTENT_ITEM_TYPE)
                 }
                 when (addrInfo.addressType) {
                     AddressInfo.RESIDENTIAL_USE_TYPE -> {
-                        newText.append("  住家： ")
+                        newText.append("  " + context.getString(R.string.label_pos_home))
                         row.put(StructuredPostal.TYPE, StructuredPostal.TYPE_HOME)
                     }
                     AddressInfo.OFFICE_TYPE -> {
-                        newText.append("  办公： ")
+                        newText.append("  " + context.getString(R.string.label_pos_work))
                         row.put(StructuredPostal.TYPE, StructuredPostal.TYPE_WORK)
                     }
                     AddressInfo.OTHER_USE_TYPE -> {
-                        newText.append("  其他： ")
+                        newText.append("  " + context.getString(R.string.label_pos_other))
                         row.put(StructuredPostal.TYPE, StructuredPostal.TYPE_OTHER)
                     }
                 }
@@ -196,8 +196,8 @@ class ScanResultParser(
         }
 
         onSetFabAction(
-            "新建联系人",
-            "新建联系人",
+            context.getString(R.string.action_add_contact),
+            context.getString(R.string.action_add_contact),
             R.drawable.outline_person_add_alt_24
         ) {
             val itt = Intent(Insert.ACTION, ContactsContract.Contacts.CONTENT_URI)
@@ -214,12 +214,12 @@ class ScanResultParser(
             if (!note.isNullOrEmpty()) {
                 itt.putExtra(Insert.NOTES, note)
             }
-            it.context.startActivity(itt)
+            context.startActivity(itt)
         }
     }
 
-    private fun appendDriverInfo(res: HmsScan, newText: StringBuilder) {
-        newText.appendLine("驾照信息：")
+    private fun appendDriverInfo(context: android.content.Context, res: HmsScan, newText: StringBuilder) {
+        newText.appendLine(context.getString(R.string.label_form_driver))
         val tmp = res.driverInfo
         val familyName = tmp.familyName
         val middleName = tmp.middleName
@@ -237,86 +237,86 @@ class ScanResultParser(
         val zipCode = tmp.zipCode
 
         if (!familyName.isNullOrEmpty()) {
-            newText.append("姓： ")
+            newText.append(context.getString(R.string.label_driver_family_name))
             newText.appendLine(familyName)
         }
         if (!middleName.isNullOrEmpty()) {
-            newText.append("中间名： ")
+            newText.append(context.getString(R.string.label_driver_middle_name))
             newText.appendLine(middleName)
         }
         if (!givenName.isNullOrEmpty()) {
-            newText.append("名： ")
+            newText.append(context.getString(R.string.label_driver_given_name))
             newText.appendLine(givenName)
         }
         if (!sex.isNullOrEmpty()) {
-            newText.append("性别： ")
+            newText.append(context.getString(R.string.label_driver_sex))
             newText.appendLine(sex)
         }
         if (!dateOfBirth.isNullOrEmpty()) {
-            newText.append("出生日期： ")
+            newText.append(context.getString(R.string.label_driver_birth))
             newText.appendLine(dateOfBirth)
         }
         if (!countryOfIssue.isNullOrEmpty()) {
-            newText.append("驾照发放国： ")
+            newText.append(context.getString(R.string.label_driver_country))
             newText.appendLine(countryOfIssue)
         }
         if (!certType.isNullOrEmpty()) {
-            newText.append("驾照类型： ")
+            newText.append(context.getString(R.string.label_driver_type))
             newText.appendLine(certType)
         }
         if (!certNum.isNullOrEmpty()) {
-            newText.append("驾照号码： ")
+            newText.append(context.getString(R.string.label_driver_num))
             newText.appendLine(certNum)
         }
         if (!dateOfIssue.isNullOrEmpty()) {
-            newText.append("发证日期： ")
+            newText.append(context.getString(R.string.label_driver_issue))
             newText.appendLine(dateOfIssue)
         }
         if (!dateOfExpire.isNullOrEmpty()) {
-            newText.append("过期日期： ")
+            newText.append(context.getString(R.string.label_driver_expire))
             newText.appendLine(dateOfExpire)
         }
         if (!province.isNullOrEmpty()) {
-            newText.append("省/州： ")
+            newText.append(context.getString(R.string.label_driver_province))
             newText.appendLine(province)
         }
         if (!city.isNullOrEmpty()) {
-            newText.append("城市： ")
+            newText.append(context.getString(R.string.label_driver_city))
             newText.appendLine(city)
         }
         if (!avenue.isNullOrEmpty()) {
-            newText.append("街道： ")
+            newText.append(context.getString(R.string.label_driver_avenue))
             newText.appendLine(avenue)
         }
         if (!zipCode.isNullOrEmpty()) {
-            newText.append("邮政编码： ")
+            newText.append(context.getString(R.string.label_driver_zip))
             newText.appendLine(zipCode)
         }
     }
 
-    private fun appendEmailContent(res: HmsScan, newText: StringBuilder) {
-        newText.appendLine("Email：")
+    private fun appendEmailContent(context: android.content.Context, res: HmsScan, newText: StringBuilder) {
+        newText.appendLine(context.getString(R.string.label_form_email))
         val email = res.emailContent
         val addrInfo = email.addressInfo
         val subjectInfo = email.subjectInfo
         val bodyInfo = email.bodyInfo.substringBeforeLast(";;")
 
         if (!addrInfo.isNullOrEmpty()) {
-            newText.append("收件邮箱： ")
+            newText.append(context.getString(R.string.hint_email_addr) + "： ")
             newText.appendLine(addrInfo)
         }
         if (!subjectInfo.isNullOrEmpty()) {
-            newText.append("主题： ")
+            newText.append(context.getString(R.string.hint_email_subject) + "： ")
             newText.appendLine(subjectInfo)
         }
         if (bodyInfo.isNotEmpty()) {
-            newText.append("内容： ")
+            newText.append(context.getString(R.string.hint_content) + "： ")
             newText.appendLine(bodyInfo)
         }
 
         onSetFabAction(
-            "发送邮件",
-            "发送邮件",
+            context.getString(R.string.action_send_email),
+            context.getString(R.string.action_send_email),
             R.drawable.outline_email_24
         ) {
             val itt = Intent(Intent.ACTION_SENDTO)
@@ -324,15 +324,15 @@ class ScanResultParser(
             itt.putExtra(Intent.EXTRA_SUBJECT, subjectInfo)
             itt.putExtra(Intent.EXTRA_TEXT, bodyInfo)
             try {
-                it.context.startActivity(itt)
+                context.startActivity(itt)
             } catch (e: ActivityNotFoundException) {
-                showErrorToast("未检测到邮箱应用")
+                showErrorToast(context.getString(R.string.toast_error_no_email_app))
             }
         }
     }
 
-    private fun appendEventInfo(res: HmsScan, newText: StringBuilder) {
-        newText.appendLine("日历事件：")
+    private fun appendEventInfo(context: android.content.Context, res: HmsScan, newText: StringBuilder) {
+        newText.appendLine(context.getString(R.string.label_form_event))
         val tmp = res.eventInfo
         val abstractInfo = tmp.abstractInfo
         val theme = tmp.theme
@@ -343,182 +343,182 @@ class ScanResultParser(
         val condition = tmp.condition
 
         if (!abstractInfo.isNullOrEmpty()) {
-            newText.append("描述： ")
+            newText.append(context.getString(R.string.label_event_desc))
             newText.appendLine(abstractInfo)
         }
         if (!theme.isNullOrEmpty()) {
-            newText.append("摘要： ")
+            newText.append(context.getString(R.string.label_event_summary))
             newText.appendLine(theme)
         }
         beginTimeInfo?.let {
-            newText.append("开始时间： ")
+            newText.append(context.getString(R.string.label_event_start))
             newText.appendLine(it.originalValue)
         }
         closeTimeInfo?.let {
-            newText.append("结束时间： ")
+            newText.append(context.getString(R.string.label_event_end))
             newText.appendLine(it.originalValue)
         }
         if (!sponsor.isNullOrEmpty()) {
-            newText.append("组织者： ")
+            newText.append(context.getString(R.string.label_event_organizer))
             newText.appendLine(sponsor)
         }
         if (!placeInfo.isNullOrEmpty()) {
-            newText.append("地点： ")
+            newText.append(context.getString(R.string.label_event_place))
             newText.appendLine(placeInfo)
         }
         if (!condition.isNullOrEmpty()) {
-            newText.append("状态： ")
+            newText.append(context.getString(R.string.label_event_status))
             newText.appendLine(condition)
         }
     }
 
-    private fun appendIsbnNumber(res: HmsScan, newText: StringBuilder) {
-        newText.appendLine("ISBN 号：")
+    private fun appendIsbnNumber(context: android.content.Context, res: HmsScan, newText: StringBuilder) {
+        newText.appendLine(context.getString(R.string.label_form_isbn))
         newText.appendLine(res.originalValue)
     }
 
-    private fun appendLocationCoordinate(res: HmsScan, newText: StringBuilder) {
-        newText.appendLine("坐标：")
+    private fun appendLocationCoordinate(context: android.content.Context, res: HmsScan, newText: StringBuilder) {
+        newText.appendLine(context.getString(R.string.label_form_location))
         val tmp = res.locationCoordinate
         val latitude = tmp.latitude
         val longitude = tmp.longitude
 
-        newText.append("纬度： ")
+        newText.append(context.getString(R.string.hint_latitude) + "： ")
         newText.appendLine(latitude)
-        newText.append("经度： ")
+        newText.append(context.getString(R.string.hint_longitude) + "： ")
         newText.appendLine(longitude)
 
         onSetFabAction(
-            "打开地图并定位",
-            "定位",
+            context.getString(R.string.action_open_map),
+            context.getString(R.string.btn_location),
             R.drawable.outline_location_on_24
         ) {
             val uri = Uri.parse("geo:$latitude,$longitude")
             val itt = Intent(Intent.ACTION_VIEW, uri)
             try {
-                it.context.startActivity(Intent.createChooser(itt, "选择一个地图应用以查看坐标位置"))
+                context.startActivity(Intent.createChooser(itt, context.getString(R.string.select_map_app)))
             } catch (e: ActivityNotFoundException) {
-                showErrorToast("未检测到地图应用")
+                showErrorToast(context.getString(R.string.toast_error_no_map_app))
             }
         }
     }
 
-    private fun appendPureText(res: HmsScan, newText: StringBuilder) {
-        newText.appendLine("文本：")
+    private fun appendPureText(context: android.content.Context, res: HmsScan, newText: StringBuilder) {
+        newText.appendLine(context.getString(R.string.label_form_text))
         newText.appendLine(res.originalValue)
     }
 
-    private fun appendSmsContent(res: HmsScan, newText: StringBuilder) {
-        newText.appendLine("短信：")
+    private fun appendSmsContent(context: android.content.Context, res: HmsScan, newText: StringBuilder) {
+        newText.appendLine(context.getString(R.string.label_form_sms))
         val tmp = res.smsContent
         val destPhoneNumber = tmp.destPhoneNumber
         val smsBody = tmp.msgContent
 
         if (!destPhoneNumber.isNullOrEmpty()) {
-            newText.append("收信人： ")
+            newText.append(context.getString(R.string.hint_sms_phone) + "： ")
             newText.appendLine(destPhoneNumber)
         }
         if (!smsBody.isNullOrEmpty()) {
-            newText.append("内容： ")
+            newText.append(context.getString(R.string.hint_content) + "： ")
             newText.appendLine(smsBody)
         }
 
         onSetFabAction(
-            "发送短信",
-            "发送短信",
+            context.getString(R.string.action_send_sms),
+            context.getString(R.string.action_send_sms),
             R.drawable.outline_sms_24
         ) {
             val uri = Uri.parse("smsto:$destPhoneNumber")
             val itt = Intent(Intent.ACTION_SENDTO, uri)
             itt.putExtra("sms_body", smsBody)
-            it.context.startActivity(itt)
+            context.startActivity(itt)
         }
     }
 
-    private fun appendTelPhoneNumber(res: HmsScan, newText: StringBuilder) {
-        newText.appendLine("电话号码：")
+    private fun appendTelPhoneNumber(context: android.content.Context, res: HmsScan, newText: StringBuilder) {
+        newText.appendLine(context.getString(R.string.label_form_phone))
         val tmp = res.telPhoneNumber
 
         when (tmp.useType) {
-            TelPhoneNumber.CELLPHONE_NUMBER_USE_TYPE -> newText.append("手机： ")
-            TelPhoneNumber.RESIDENTIAL_USE_TYPE -> newText.append("住家： ")
-            TelPhoneNumber.OFFICE_USE_TYPE -> newText.append("办公： ")
-            TelPhoneNumber.FAX_USE_TYPE -> newText.append("传真： ")
-            TelPhoneNumber.OTHER_USE_TYPE -> newText.append("其他： ")
+            TelPhoneNumber.CELLPHONE_NUMBER_USE_TYPE -> newText.append(context.getString(R.string.label_tel_cell))
+            TelPhoneNumber.RESIDENTIAL_USE_TYPE -> newText.append(context.getString(R.string.label_tel_home))
+            TelPhoneNumber.OFFICE_USE_TYPE -> newText.append(context.getString(R.string.label_tel_work))
+            TelPhoneNumber.FAX_USE_TYPE -> newText.append(context.getString(R.string.label_tel_fax))
+            TelPhoneNumber.OTHER_USE_TYPE -> newText.append(context.getString(R.string.label_tel_other))
         }
         newText.appendLine(tmp.telPhoneNumber)
 
         onSetFabAction(
-            "拨打电话",
-            "拨打电话",
+            context.getString(R.string.action_dial),
+            context.getString(R.string.action_dial),
             R.drawable.baseline_phone_forwarded_24
         ) {
             val itt = Intent(Intent.ACTION_DIAL)
             itt.setData(Uri.parse("tel:${tmp.telPhoneNumber}"))
-            it.context.startActivity(itt)
+            context.startActivity(itt)
         }
     }
 
-    private fun appendUrl(res: HmsScan, newText: StringBuilder) {
-        newText.appendLine("URL 链接：")
+    private fun appendUrl(context: android.content.Context, res: HmsScan, newText: StringBuilder) {
+        newText.appendLine(context.getString(R.string.label_form_url))
         val tmp = res.linkUrl
         val theme = tmp.theme
         val linkValue = tmp.linkValue
 
         if (!theme.isNullOrEmpty()) {
-            newText.append("标题： ")
+            newText.append(context.getString(R.string.hint_email_subject) + "： ")
             newText.appendLine(theme)
         }
         if (!linkValue.isNullOrEmpty()) {
-            newText.append("链接： ")
+            newText.append(context.getString(R.string.label_form_url) + "： ")
             newText.appendLine(linkValue)
         }
     }
 
-    private fun appendWifiConnectionInfo(res: HmsScan, newText: StringBuilder) {
-        newText.appendLine("Wi-Fi 信息：")
+    private fun appendWifiConnectionInfo(context: android.content.Context, res: HmsScan, newText: StringBuilder) {
+        newText.appendLine(context.getString(R.string.label_form_wifi))
         val tmp = res.wiFiConnectionInfo
         val ssid = tmp.ssidNumber
         val pwd = tmp.password
         val cipherMode = tmp.cipherMode
 
         if (!ssid.isNullOrEmpty()) {
-            newText.append("接入点名称： ")
+            newText.append(context.getString(R.string.label_wifi_ssid))
             newText.appendLine(ssid)
         }
         if (!pwd.isNullOrEmpty()) {
-            newText.append("密码： ")
+            newText.append(context.getString(R.string.label_wifi_pwd))
             newText.appendLine(pwd)
         }
-        newText.append("加密方式： ")
+        newText.append(context.getString(R.string.label_wifi_cipher))
         when (cipherMode) {
             WiFiConnectionInfo.WPA_MODE_TYPE -> newText.appendLine("WPA/WPA2")
             WiFiConnectionInfo.WEP_MODE_TYPE -> newText.appendLine("WEP")
-            WiFiConnectionInfo.NO_PASSWORD_MODE_TYPE -> newText.appendLine("开放")
+            WiFiConnectionInfo.NO_PASSWORD_MODE_TYPE -> newText.appendLine(context.getString(R.string.wifi_no_password))
             WiFiConnectionInfo.SAE_MODE_TYPE -> newText.appendLine("WPA3")
         }
-        newText.append("隐藏： ")
-        newText.appendLine(if (res.originalValue.contains("H:true", ignoreCase = true)) "是" else "否")
+        newText.append(context.getString(R.string.label_wifi_hidden_status))
+        newText.appendLine(if (res.originalValue.contains("H:true", ignoreCase = true)) context.getString(R.string.yes) else context.getString(R.string.no))
 
         onSetFabAction(
-            "连接热点",
-            "连接热点",
+            context.getString(R.string.action_connect_wifi),
+            context.getString(R.string.action_connect_wifi),
             R.drawable.baseline_wifi_find_24
         ) {
-            val wifiHelper = WifiHelper(it.context)
+            val wifiHelper = WifiHelper(context)
             PermissionHelper.requestPermissions(
-                it.context as androidx.fragment.app.FragmentActivity,
+                context as androidx.fragment.app.FragmentActivity,
                 PermissionHelper.PermissionConfig(
                     permissions = listOf(WifiHelper.PERMISSION),
-                    explainReasonTitle = "连接热点必须使用以下权限"
+                    explainReasonTitle = context.getString(R.string.perm_wifi_hotspot)
                 ),
                 onGranted = { wifiHelper.connectWifi(ssid, pwd) }
             )
         }
     }
 
-    private fun appendOtherForm(res: HmsScan, newText: StringBuilder) {
-        newText.appendLine("未知类型信息：")
+    private fun appendOtherForm(context: android.content.Context, res: HmsScan, newText: StringBuilder) {
+        newText.appendLine(context.getString(R.string.label_form_unknown))
         newText.appendLine(res.originalValue)
     }
 }

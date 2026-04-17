@@ -21,7 +21,7 @@
             android:background="?attr/colorPrimaryContainer"
             android:minHeight="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|enterAlwaysCollapsed"
-            app:title="构建码"
+            app:title="@string/label_generate"
             app:titleCentered="true" />
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -33,7 +33,7 @@
         android:layout_marginStart="12dp"
         android:layout_marginTop="12dp"
         android:layout_marginEnd="12dp"
-        android:hint="码类型"
+        android:hint="@string/hint_code_type"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/topAppBarLayout">
@@ -54,7 +54,7 @@
         android:layout_marginStart="12dp"
         android:layout_marginTop="12dp"
         android:layout_marginEnd="12dp"
-        android:hint="内容"
+        android:hint="@string/hint_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -75,7 +75,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:layout_marginEnd="8dp"
-        android:text="转换特殊信息"
+        android:text="@string/label_convert_special"
         app:layout_constraintEnd_toStartOf="@+id/btn_gen_code"
         app:layout_constraintTop_toBottomOf="@+id/tv_len_ind" />
 
@@ -85,7 +85,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:layout_marginEnd="12dp"
-        android:text="生成预览"
+        android:text="@string/label_preview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_len_ind" />
 

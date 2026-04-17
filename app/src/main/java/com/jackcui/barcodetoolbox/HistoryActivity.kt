@@ -13,6 +13,10 @@ class HistoryActivity : AppCompatActivity() {
 
     private lateinit var bd: ActivityHistoryBinding
 
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(LocaleHelper.applyLocale(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -21,25 +25,25 @@ class HistoryActivity : AppCompatActivity() {
 
         val itt = intent
         val history = itt.getSerializableExtra("history_map") as? History ?: run {
-            showErrorToast("数据获取失败")
+            showErrorToast(getString(R.string.toast_error_data_failed))
             finish()
             return
         }
         val key = itt.getStringExtra("key") ?: run {
-            showErrorToast("数据获取失败")
+            showErrorToast(getString(R.string.toast_error_data_failed))
             finish()
             return
         }
         val listIndex = itt.getIntExtra("list_index", -1)
 
         val historyList = history[key] ?: run {
-            showErrorToast("未找到对应记录")
+            showErrorToast(getString(R.string.toast_error_record_not_found))
             finish()
             return
         }
 
         if (listIndex < 0 || listIndex >= historyList.size) {
-            showErrorToast("记录索引无效")
+            showErrorToast(getString(R.string.toast_error_invalid_index))
             finish()
             return
         }
@@ -57,12 +61,12 @@ class HistoryActivity : AppCompatActivity() {
         }
 
         bd.efabRemoveRecord.setOnClickListener {
-            MaterialAlertDialogBuilder(this).setTitle("删除记录")
-                .setMessage("日期：$key\n索引：${listIndex}\n确认要删除吗？此操作不可撤销！")
-                .setPositiveButton("确认") { _, _ ->
+            MaterialAlertDialogBuilder(this).setTitle(getString(R.string.dialog_title_delete_confirm))
+                .setMessage(getString(R.string.msg_delete_confirm, key, listIndex))
+                .setPositiveButton(getString(R.string.btn_confirm)) { _, _ ->
                     val file = File(applicationContext.filesDir, "history.json")
                     if (!file.exists()) {
-                        showErrorToast("删除指定历史记录时出错，未找到数据文件")
+                        showErrorToast(getString(R.string.toast_error_data_failed)) // Re-using data failed as it's general
                         return@setPositiveButton
                     }
                     if (historyList.size > 1) {
@@ -72,7 +76,7 @@ class HistoryActivity : AppCompatActivity() {
                         history.remove(key)
                     }
                     file.writeText(JSON.toJSONString(history))
-                    showInfoToast("日期：$key\n索引：${listIndex}\n记录删除成功")
+                    showInfoToast(getString(R.string.msg_delete_success, key, listIndex))
                     finish()
                 }.show()
         }

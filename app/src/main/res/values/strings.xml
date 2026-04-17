@@ -1,5 +1,251 @@
 <resources>
-    <string name="app_name">条码工具箱</string>
-    <string name="title_activity_settings">设置</string>
-    <string name="introduction">欢迎使用 “条码工具箱” 应用！\n本应用不仅提供了各类码的扫描识别功能，还提供了构建功能。\n支持外部应用导入图片扫描，在外部应用选择打开或分享图片并选择此应用即可。\n扫描码内容的同时可以解析提取各类有效信息，而不必纠结于原始字符串的含义。\n构建功能仍处于 Beta 阶段，有问题可以随时和开发者反馈。\n下列功能支持一图多码扫描：\n图片文件扫描，拍照扫描\n\n开发者：酷安@威尼斯的向日</string>
+    <string name="app_name">Barcode Toolbox</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="introduction">Welcome to use the \"Barcode Toolbox\" app!\nThis app not only provides scanning and identification functions for various codes, but also provides construction functions.\nSupports importing pictures from external apps for scanning. Just choose to open or share the picture in the external app and select this app.\nWhile scanning the code content, various valid information can be parsed and extracted, without having to dwell on the meaning of the original string.\nThe construction function is still in Beta stage. Any problems can be reported to the developer at any time.\nThe following functions support scanning multiple codes in one image:\nImage file scanning, camera scanning\n\nDeveloper: Coolapk@威尼斯的向日葵</string>
+
+    <!-- UI Labels -->
+    <string name="label_clear">Clear screen</string>
+    <string name="label_scan">Scan code</string>
+    <string name="label_generate">Build code</string>
+    <string name="label_history">History</string>
+    <string name="label_save">Save</string>
+    <string name="label_query">Query</string>
+    <string name="label_delete_record">Delete record</string>
+    <string name="label_convert_special">Convert special info</string>
+    <string name="label_preview">Generate preview</string>
+
+    <!-- Hints -->
+    <string name="hint_code_type">Code type</string>
+    <string name="hint_content">Content</string>
+    <string name="hint_wifi_ssid">SSID</string>
+    <string name="hint_wifi_password">Password</string>
+    <string name="hint_wifi_cipher">Encryption</string>
+    <string name="hint_wifi_hidden">Hidden network</string>
+    <string name="hint_sms_phone">Recipient number</string>
+    <string name="hint_phone_number">Number</string>
+    <string name="hint_history_date">Date</string>
+    <string name="hint_history_index">Index</string>
+    <string name="hint_email_addr">Recipient email</string>
+    <string name="hint_email_subject">Subject</string>
+    <string name="hint_latitude">Latitude</string>
+    <string name="hint_longitude">Longitude</string>
+    <string name="hint_name">Name</string>
+    <string name="hint_mobile">Mobile</string>
+    <string name="hint_office">Office</string>
+    <string name="hint_home">Home</string>
+    <string name="hint_address">Address</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_website">Website</string>
+    <string name="hint_company">Company</string>
+    <string name="hint_job_title">Job title</string>
+    <string name="label_phone">Phone</string>
+    <string name="label_other_info">Other info</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_title_help">Help</string>
+    <string name="dialog_title_history">History</string>
+    <string name="dialog_title_filter">Filter</string>
+    <string name="dialog_title_scan_mode">Scan mode</string>
+    <string name="dialog_title_delete_confirm">Delete record</string>
+    <string name="dialog_title_select_type">Please select an information type</string>
+    <string name="dialog_title_wifi">Wi-Fi</string>
+    <string name="dialog_title_email">E-mail</string>
+    <string name="dialog_title_phone">Phone number</string>
+    <string name="dialog_title_sms">SMS</string>
+    <string name="dialog_title_contact">Contact</string>
+    <string name="dialog_title_coord">Coordinates</string>
+
+    <!-- Buttons -->
+    <string name="btn_confirm">Confirm</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_ok">Ok</string>
+    <string name="btn_good">Good</string>
+    <string name="btn_goto_settings">Go to settings</string>
+    <string name="btn_search_nearby">Search nearby hotspots</string>
+    <string name="btn_import_contact">Import contact</string>
+    <string name="btn_location">Locate</string>
+
+    <!-- Toasts / Messages -->
+    <string name="toast_clear_success">Output info cleared</string>
+    <string name="toast_error_file_type">Imported wrong file type</string>
+    <string name="toast_error_option_incomplete">Options incomplete</string>
+    <string name="toast_error_read_image_failed">Failed to read image</string>
+    <string name="toast_error_no_result">No result</string>
+    <string name="toast_error_data_failed">Failed to get data</string>
+    <string name="toast_error_record_not_found">Record not found</string>
+    <string name="toast_error_invalid_index">Invalid record index</string>
+    <string name="toast_error_permission_denied">Permission request denied</string>
+    <string name="toast_error_no_email_app">No email app detected</string>
+    <string name="toast_error_no_map_app">No map app detected</string>
+    <string name="toast_error_no_hotspot">Hotspot not scanned nearby</string>
+    <string name="toast_info_convert_success">Special info conversion completed</string>
+    <string name="toast_info_preview_success">Preview generated successfully, long press image to save</string>
+    <string name="toast_info_save_success">Image saved to: %1$s</string>
+    <string name="toast_error_save_failed">Exception occurred, image saving failed</string>
+    <string name="toast_error_no_code_type">Code type not selected, cannot generate preview</string>
+    <string name="toast_error_over_limit">Byte limit exceeded, cannot generate preview</string>
+    <string name="toast_error_empty_content">Text content is empty, cannot generate preview</string>
+    <string name="toast_error_exception">Exception occurred, please check if input content meets specific code requirements</string>
+    <string name="toast_error_need_preview">Please generate preview first</string>
+    <string name="toast_error_at_least_one">At least one item of information is required</string>
+    <string name="toast_error_location_service">Please turn on location services</string>
+    <string name="toast_error_wifi_enabled">Please turn on WLAN first</string>
+    <string name="error_field_required_ssid">SSID cannot be empty</string>
+    <string name="error_field_required_pwd">Password cannot be empty</string>
+    <string name="error_field_required_cipher">Encryption method cannot be empty</string>
+    <string name="error_field_required_email">Email cannot be empty</string>
+    <string name="error_field_required_subject">Subject cannot be empty</string>
+    <string name="error_field_required_content">Content cannot be empty</string>
+    <string name="error_field_required_phone">Phone number cannot be empty</string>
+    <string name="error_field_required_longitude">Longitude cannot be empty</string>
+    <string name="error_field_required_latitude">Latitude cannot be empty</string>
+
+    <string name="perm_forward_to_settings">Permission request permanently denied\nYou need to manually enable permissions in app settings</string>
+    <string name="scan_result_multi_pic">Multi-image detected, count: %1$d</string>
+    <string name="scan_result_multi_code">Multi-code detected, count: %1$d</string>
+    <string name="scan_result_history_date">Recognition #%1$d</string>
+    <string name="scan_result_history_pic">Image %1$d</string>
+    <string name="scan_result_history_code">Code %1$d</string>
+
+    <!-- Helper Texts -->
+    <string name="helper_wifi_no_pwd">No password required for current encryption mode</string>
+    <string name="helper_import_count">Imported %1$d numbers, please select manually</string>
+    <string name="helper_import_email_count">Imported %1$d emails, please select manually</string>
+    <string name="helper_import_website_count">Imported %1$d websites, please select manually</string>
+    <string name="helper_import_addr_count">Imported %1$d addresses, please select manually</string>
+    <string name="helper_import_email_addr_count">Imported %1$d email addresses, please select manually</string>
+    <string name="helper_locating">Locating...</string>
+    <string name="helper_location_success">Location successful</string>
+    <string name="helper_search_wifi_count">Searched %1$d hotspots, please select manually</string>
+
+    <!-- Permissions -->
+    <string name="perm_loc_hotspot">The following permissions must be used to scan hotspots</string>
+    <string name="perm_loc_coord">The following permissions must be used for positioning</string>
+    <string name="perm_save_pic">The following permissions must be used to save barcode images</string>
+    <string name="perm_contact">The following permissions must be used for contact related operations</string>
+    <string name="perm_scan">The following permissions must be used to scan codes</string>
+    <string name="perm_wifi_hotspot">The following permissions must be used to connect to hotspots</string>
+
+    <!-- Others -->
+    <string name="wait_for_scan">Waiting for recognition</string>
+    <string name="select_map_app">Select a map app to view coordinate position</string>
+    <string name="unit_byte_available">Available bytes: %1$s</string>
+    <string name="invoked_by_intent_view">[Opened by external app]</string>
+    <string name="invoked_by_intent_send">[Shared by external app]</string>
+    <string name="scan_mode_desc_custom_view">Popup viewfinder for real-time scanning, similar to WeChat/Alipay, supports single code only</string>
+    <string name="scan_mode_desc_bitmap">Enter camera interface, scan only after shutter button is pressed, supports multi-code</string>
+    <string name="scan_mode_desc_multi">Enter file manager, select image files for scanning, supports batch selection and multi-code</string>
+    <string name="wifi_no_password">Open</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="scan_type_wx">WeChat code</string>
+    <string name="scan_type_multi">Multifunctional code</string>
+
+    <!-- Preferences -->
+    <string name="pref_cat_general">General</string>
+    <string name="pref_title_language">Language</string>
+    <string name="pref_language_follow_system">Follow system</string>
+    <string name="pref_language_zh_cn" translatable="false">简体中文</string>
+    <string name="pref_language_zh_tw" translatable="false">繁體中文</string>
+    <string name="pref_language_en" translatable="false">English</string>
+    <string name="pref_cat_scan">Scan code</string>
+    <string name="pref_title_default_scan_mode">Default scan mode</string>
+    <string name="pref_title_parse">Code parsing</string>
+    <string name="pref_summary_parse_on">Output parsed data</string>
+    <string name="pref_summary_parse_off">Output original string</string>
+    <string name="pref_title_auto_save">Auto-save scan result</string>
+    <string name="pref_summary_auto_save_on">Scan results will be automatically saved to history</string>
+    <string name="pref_summary_auto_save_off">Scan results will not be automatically saved to history</string>
+    <string name="pref_title_scan_prefix">Custom scan prefix</string>
+    <string name="pref_title_pic_prefix">Custom multi-pic prefix</string>
+    <string name="pref_title_code_prefix">Custom multi-code prefix</string>
+    <string name="pref_cat_generate">Build code</string>
+    <string name="pref_title_show_code_info">Show code type info</string>
+    <string name="pref_summary_show_code_info_on">Show specific requirements in popup after selecting code type</string>
+    <string name="pref_summary_show_code_info_off">Specific requirements will not be shown after selecting code type</string>
+
+    <string name="msg_delete_confirm">Date: %1$s\nIndex: %2$d\nConfirm deletion? This cannot be undone!</string>
+    <string name="msg_delete_success">Date: %1$s\nIndex: %2$d\nRecord deleted successfully</string>
+    <string name="msg_save_history_success">Date: %1$s\nIndex: %2$d\nSaved successfully</string>
+
+    <string name="toast_info_wifi_connect_success">%1$S - connected successfully</string>
+    <string name="toast_error_wifi_connect_fail">%1$S - connection failed</string>
+
+    <!-- ScanResultParser specific -->
+    <string name="label_scan_type_qr">QR code</string>
+    <string name="label_scan_type_aztec">AZTEC code</string>
+    <string name="label_scan_type_datamatrix">Data matrix code</string>
+    <string name="label_scan_type_pdf417">Pdf417 code</string>
+    <string name="label_scan_type_code93">Code93 code</string>
+    <string name="label_scan_type_code39">Code39 code</string>
+    <string name="label_scan_type_code128">Code128 code</string>
+    <string name="label_scan_type_ean13">Ean13 code</string>
+    <string name="label_scan_type_ean8">Ean8 code</string>
+    <string name="label_scan_type_itf14">Itf14 code</string>
+    <string name="label_scan_type_upc_a">Upc_a code</string>
+    <string name="label_scan_type_upc_e">Upc_e code</string>
+    <string name="label_scan_type_codabar">Codabar code</string>
+
+    <string name="label_form_product">Product info:</string>
+    <string name="label_form_contact">Contact:</string>
+    <string name="label_form_driver">Driver info:</string>
+    <string name="label_form_email">Email:</string>
+    <string name="label_form_event">Calendar event:</string>
+    <string name="label_form_isbn">ISBN number:</string>
+    <string name="label_form_location">Coordinates:</string>
+    <string name="label_form_text">Text:</string>
+    <string name="label_form_sms">SMS:</string>
+    <string name="label_form_phone">Phone number:</string>
+    <string name="label_form_url">URL link:</string>
+    <string name="label_form_wifi">Wi-Fi info:</string>
+    <string name="label_form_unknown">Unknown type info:</string>
+
+    <string name="label_tel_cell">Mobile: </string>
+    <string name="label_tel_home">Home: </string>
+    <string name="label_tel_work">Office: </string>
+    <string name="label_tel_fax">Fax: </string>
+    <string name="label_tel_other">Other: </string>
+
+    <string name="label_email_home">Home: </string>
+    <string name="label_email_work">Office: </string>
+    <string name="label_email_other">Other: </string>
+
+    <string name="label_pos_home">Home: </string>
+    <string name="label_pos_work">Office: </string>
+    <string name="label_pos_other">Other: </string>
+
+    <string name="label_driver_family_name">Family name: </string>
+    <string name="label_driver_middle_name">Middle name: </string>
+    <string name="label_driver_given_name">Given name: </string>
+    <string name="label_driver_sex">Sex: </string>
+    <string name="label_driver_birth">Date of birth: </string>
+    <string name="label_driver_country">Country of issue: </string>
+    <string name="label_driver_type">Certificate type: </string>
+    <string name="label_driver_num">Certificate number: </string>
+    <string name="label_driver_issue">Date of issue: </string>
+    <string name="label_driver_expire">Date of expire: </string>
+    <string name="label_driver_province">Province/state: </string>
+    <string name="label_driver_city">City: </string>
+    <string name="label_driver_avenue">Avenue: </string>
+    <string name="label_driver_zip">Zip code: </string>
+
+    <string name="label_event_desc">Description: </string>
+    <string name="label_event_summary">Summary: </string>
+    <string name="label_event_start">Start time: </string>
+    <string name="label_event_end">End time: </string>
+    <string name="label_event_organizer">Organizer: </string>
+    <string name="label_event_place">Place: </string>
+    <string name="label_event_status">Status: </string>
+
+    <string name="label_wifi_ssid">SSID: </string>
+    <string name="label_wifi_pwd">Password: </string>
+    <string name="label_wifi_cipher">Cipher mode: </string>
+    <string name="label_wifi_hidden_status">Hidden: </string>
+
+    <string name="action_add_contact">New contact</string>
+    <string name="action_send_email">Send email</string>
+    <string name="action_open_map">Open map</string>
+    <string name="action_send_sms">Send SMS</string>
+    <string name="action_dial">Dial phone</string>
+    <string name="action_connect_wifi">Connect hotspot</string>
 </resources>

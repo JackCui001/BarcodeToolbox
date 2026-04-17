@@ -10,11 +10,11 @@ object PermissionHelper {
     data class PermissionConfig(
         val permissions: List<String>,
         val explainReasonTitle: String,
-        val explainReasonPositiveText: String = "好的",
-        val explainReasonNegativeText: String = "取消",
-        val forwardToSettingsTitle: String = "授权请求被永久拒绝\n您需要去应用程序设置中手动开启权限",
-        val forwardToSettingsPositiveText: String = "跳转到设置",
-        val forwardToSettingsNegativeText: String = "取消"
+        val explainReasonPositiveText: String = "OK",
+        val explainReasonNegativeText: String = "Cancel",
+        val forwardToSettingsTitle: String = "Permission permanently denied\nYou need to go to app settings to manually enable permissions",
+        val forwardToSettingsPositiveText: String = "Settings",
+        val forwardToSettingsNegativeText: String = "Cancel"
     )
 
     fun requestPermissions(
@@ -46,7 +46,7 @@ object PermissionHelper {
                 if (allGranted) {
                     onGranted()
                 } else {
-                    showErrorToast("授权请求被拒绝")
+                    showErrorToast(activity.getString(R.string.toast_error_permission_denied))
                     onDenied?.invoke()
                 }
             }

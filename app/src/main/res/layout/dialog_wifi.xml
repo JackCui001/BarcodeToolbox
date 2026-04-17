@@ -16,7 +16,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:hint="热点名称 (SSID)"
+            android:hint="@string/hint_wifi_ssid"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -35,7 +35,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
-            android:hint="密码"
+            android:hint="@string/hint_wifi_password"
             app:endIconMode="password_toggle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -56,7 +56,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
-            android:hint="加密方式"
+            android:hint="@string/hint_wifi_cipher"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/til_wifi_pwd">
@@ -76,7 +76,7 @@
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:paddingBottom="2dp"
-            android:text="隐藏网络"
+            android:text="@string/hint_wifi_hidden"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/til_wifi_cipher" />
