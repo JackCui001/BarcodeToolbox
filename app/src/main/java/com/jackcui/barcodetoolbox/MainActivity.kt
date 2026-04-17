@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity() {
     private var multiScanPrefix: String? = null
     private var multiPicPrefix: String? = null
     private var multiCodePrefix: String? = null
+    private var defaultScanMode: String? = null
     private var saveImageUri: Uri? = null
     private var scanCnt = 1
     private var bParse = true
@@ -200,28 +201,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         bd.fabScanCode.setOnClickListener {
-            val items = arrayOf("普通扫码", "拍照扫码", "图片文件扫码")
-            var choice = -1
-            MaterialAlertDialogBuilder(this).setTitle("扫码方式")
-                .setSingleChoiceItems(items, -1) { _, which ->
-                    choice = which
-                    val text = StringBuilder("${items[which]}：")
-                    text.append(
-                        when (which) {
-                            0 -> "弹出取景框实时扫描，最主流的扫码方式，与微信、支付宝相同，只支持单码"
-                            1 -> "进入相机拍照界面，按下拍照按钮后才对照片进行扫描，支持多码"
-                            2 -> "进入文件管理器，选择图片文件扫描，可批量选择图片，支持多码"
-                            else -> ""
-                        }
-                    )
-                    showInfoToast(text.toString())
-                }.setPositiveButton("确定") { _, _ ->
-                    when (choice) {
-                        0 -> reqPermAndScan(true)
-                        1 -> reqPermAndScan(false)
-                        2 -> pickFilesLauncher.launch("image/*")
-                    }
-                }.show()
+            when (defaultScanMode) {
+                SCAN_MODE_NORMAL -> reqPermAndScan(true)
+                SCAN_MODE_CAMERA -> reqPermAndScan(false)
+                SCAN_MODE_FILE -> pickFilesLauncher.launch("image/*")
+                else -> showScanModeDialog()
+            }
         }
 
         bd.fabGenCode.setOnClickListener {
@@ -299,10 +284,36 @@ class MainActivity : AppCompatActivity() {
         multiScanPrefix = sharedPreferences.getString("multi_scan_prefix", null)
         multiPicPrefix = sharedPreferences.getString("multi_pic_prefix", null)
         multiCodePrefix = sharedPreferences.getString("multi_code_prefix", null)
+        defaultScanMode = sharedPreferences.getString("default_scan_mode", SCAN_MODE_ASK)
         // 读取布尔值ccc
         bParse = sharedPreferences.getBoolean("parse", true)
         bAutoSaveResult = sharedPreferences.getBoolean("auto_save_result", false)
 
+    }
+
+    private fun showScanModeDialog() {
+        val items = arrayOf("普通扫码", "拍照扫码", "图片文件扫码")
+        var choice = -1
+        MaterialAlertDialogBuilder(this).setTitle("扫码方式")
+            .setSingleChoiceItems(items, -1) { _, which ->
+                choice = which
+                val text = StringBuilder("${items[which]}：")
+                text.append(
+                    when (which) {
+                        0 -> "弹出取景框实时扫描，最主流的扫码方式，与微信、支付宝相同，只支持单码"
+                        1 -> "进入相机拍照界面，按下拍照按钮后才对照片进行扫描，支持多码"
+                        2 -> "进入文件管理器，选择图片文件扫描，可批量选择图片，支持多码"
+                        else -> ""
+                    }
+                )
+                showInfoToast(text.toString())
+            }.setPositiveButton("确定") { _, _ ->
+                when (choice) {
+                    0 -> reqPermAndScan(true)
+                    1 -> reqPermAndScan(false)
+                    2 -> pickFilesLauncher.launch("image/*")
+                }
+            }.show()
     }
 
     private fun handleViewImage(intent: Intent) {

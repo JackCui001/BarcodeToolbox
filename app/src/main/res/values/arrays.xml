@@ -50,4 +50,16 @@
         <item>80</item>
         <item>2953</item>
     </integer-array>
+    <string-array name="scan_mode_entries">
+        <item>每次选择</item>
+        <item>普通扫码</item>
+        <item>拍照扫码</item>
+        <item>图片文件扫码</item>
+    </string-array>
+    <string-array name="scan_mode_values">
+        <item>ask</item>
+        <item>normal</item>
+        <item>camera</item>
+        <item>file</item>
+    </string-array>
 </resources>
